@@ -1,0 +1,1420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Content Creation with CapCut</title>
+<style>
+  :root {
+    --bg: #0d0d14;
+    --surface: #16161f;
+    --surface2: #1e1e2e;
+    --accent: #7c3aed;
+    --accent2: #06b6d4;
+    --accent3: #f59e0b;
+    --text: #e2e8f0;
+    --muted: #94a3b8;
+    --border: #2d2d3d;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    height: 100vh;
+    overflow: hidden;
+    user-select: none;
+  }
+
+  /* Progress bar */
+  #progress-bar {
+    position: fixed;
+    top: 0; left: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    transition: width 0.4s ease;
+    z-index: 100;
+  }
+
+  /* Slide counter */
+  #counter {
+    position: fixed;
+    top: 14px; right: 20px;
+    font-size: 13px;
+    color: var(--muted);
+    z-index: 100;
+    letter-spacing: 0.05em;
+  }
+
+  /* Nav buttons */
+  .nav-btn {
+    position: fixed;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(255,255,255,0.06);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 18px;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s;
+    z-index: 100;
+  }
+  .nav-btn:hover { background: rgba(124,58,237,0.3); color: #fff; border-color: var(--accent); }
+  #btn-prev { left: 18px; }
+  #btn-next { right: 18px; }
+
+  /* Slide dots */
+  #dots {
+    position: fixed;
+    bottom: 20px; left: 50%;
+    transform: translateX(-50%);
+    display: flex; gap: 6px;
+    z-index: 100;
+    flex-wrap: wrap;
+    justify-content: center;
+    max-width: 600px;
+    padding: 0 60px;
+  }
+  .dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--border);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .dot.active { background: var(--accent); transform: scale(1.4); }
+  .dot:hover { background: var(--muted); }
+
+  /* Slide container */
+  #slides {
+    width: 100%; height: 100vh;
+    position: relative;
+  }
+
+  .slide {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 120px;
+    opacity: 0;
+    transform: translateX(60px);
+    transition: opacity 0.4s ease, transform 0.4s ease;
+    pointer-events: none;
+  }
+  .slide.active {
+    opacity: 1;
+    transform: translateX(0);
+    pointer-events: all;
+  }
+  .slide.exit {
+    opacity: 0;
+    transform: translateX(-60px);
+  }
+
+  /* Slide types */
+  .slide-title { justify-content: center; text-align: center; }
+  .slide-content { align-items: flex-start; justify-content: center; }
+
+  /* Typography */
+  .slide h1 {
+    font-size: clamp(2rem, 4vw, 3.2rem);
+    font-weight: 800;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+  }
+  .slide h2 {
+    font-size: clamp(1.2rem, 2.5vw, 1.8rem);
+    font-weight: 400;
+    color: var(--muted);
+    margin-top: 10px;
+    line-height: 1.4;
+  }
+  .slide h3 {
+    font-size: clamp(1.5rem, 3vw, 2.2rem);
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 24px;
+  }
+  .slide p {
+    font-size: clamp(0.95rem, 1.6vw, 1.15rem);
+    color: var(--muted);
+    line-height: 1.7;
+    margin-top: 10px;
+  }
+
+  /* Accent text */
+  .accent { color: var(--accent2); }
+  .accent2 { color: var(--accent3); }
+  .accent3 { color: #a78bfa; }
+
+  /* Tag line */
+  .tagline {
+    display: inline-block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent2);
+    background: rgba(6,182,212,0.1);
+    border: 1px solid rgba(6,182,212,0.25);
+    padding: 5px 14px;
+    border-radius: 100px;
+    margin-bottom: 20px;
+  }
+
+  /* Lists */
+  .bullet-list {
+    list-style: none;
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+  }
+  .bullet-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    font-size: clamp(0.9rem, 1.5vw, 1.1rem);
+    line-height: 1.5;
+    color: var(--text);
+  }
+  .bullet-list li::before {
+    content: '▸';
+    color: var(--accent2);
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  /* Pipeline flow */
+  .pipeline {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 30px;
+    gap: 6px;
+  }
+  .pipe-step {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 22px;
+    font-size: clamp(0.8rem, 1.4vw, 1rem);
+    font-weight: 600;
+    color: var(--text);
+    text-align: center;
+  }
+  .pipe-arrow {
+    color: var(--accent);
+    font-size: 1.4rem;
+    font-weight: bold;
+    padding: 0 4px;
+  }
+
+  /* Tool grid */
+  .tool-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    width: 100%;
+    margin-top: 10px;
+  }
+  .tool-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 18px 20px;
+  }
+  .tool-card .label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent2);
+    margin-bottom: 10px;
+  }
+  .tool-card .tools {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .tool-card .tool-item {
+    font-size: clamp(0.85rem, 1.3vw, 0.95rem);
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .tool-card .tool-item::before {
+    content: '';
+    width: 6px; height: 6px;
+    background: var(--accent3);
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  /* Code / prompt box */
+  .prompt-box {
+    background: #0a0a12;
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 10px;
+    padding: 18px 22px;
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-size: clamp(0.8rem, 1.3vw, 0.95rem);
+    color: #c4b5fd;
+    line-height: 1.8;
+    margin-top: 14px;
+    width: 100%;
+    white-space: pre-wrap;
+  }
+
+  /* Formula */
+  .formula {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px 24px;
+    font-size: clamp(0.95rem, 1.6vw, 1.15rem);
+    font-weight: 600;
+    color: var(--accent2);
+    text-align: center;
+    margin-top: 16px;
+    letter-spacing: 0.03em;
+    width: 100%;
+  }
+
+  /* Two column layout */
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    width: 100%;
+    margin-top: 10px;
+  }
+  .col-block {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 18px 20px;
+  }
+  .col-block .col-title {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent3);
+    margin-bottom: 12px;
+  }
+
+  /* Highlight card */
+  .highlight-card {
+    background: linear-gradient(135deg, rgba(124,58,237,0.15), rgba(6,182,212,0.1));
+    border: 1px solid rgba(124,58,237,0.3);
+    border-radius: 16px;
+    padding: 22px 28px;
+    width: 100%;
+    margin-top: 14px;
+  }
+  .highlight-card p {
+    color: var(--text);
+    font-size: clamp(0.95rem, 1.6vw, 1.1rem);
+    line-height: 1.7;
+  }
+
+  /* Badge row */
+  .badge-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 14px;
+  }
+  .badge {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-size: clamp(0.78rem, 1.2vw, 0.9rem);
+    color: var(--text);
+    font-weight: 500;
+  }
+  .badge.purple { border-color: rgba(167,139,250,0.4); color: #c4b5fd; }
+  .badge.cyan { border-color: rgba(6,182,212,0.4); color: #67e8f9; }
+  .badge.amber { border-color: rgba(245,158,11,0.4); color: #fcd34d; }
+
+  /* Mindset quote */
+  .quote {
+    font-size: clamp(1.2rem, 2.5vw, 1.8rem);
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.6;
+    text-align: center;
+    margin-top: 16px;
+  }
+  .quote span { color: var(--accent2); }
+
+  /* Steps flow */
+  .steps-flow {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+    margin-top: 10px;
+  }
+  .step-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 18px;
+  }
+  .step-num {
+    width: 30px; height: 30px;
+    background: var(--accent);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.85rem;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  .step-text {
+    font-size: clamp(0.88rem, 1.4vw, 1rem);
+    color: var(--text);
+  }
+
+  /* Keyboard hint */
+  #kbd-hint {
+    position: fixed;
+    bottom: 55px; right: 20px;
+    font-size: 11px;
+    color: rgba(148,163,184,0.5);
+    z-index: 100;
+    text-align: right;
+    line-height: 1.8;
+  }
+
+  /* Divider */
+  .divider {
+    width: 60px; height: 3px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    border-radius: 2px;
+    margin: 16px 0;
+  }
+
+  /* Closing slide */
+  .closing-lines {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-top: 20px;
+    width: 100%;
+  }
+  .closing-line {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-size: clamp(1rem, 1.8vw, 1.3rem);
+    font-weight: 600;
+    color: var(--text);
+  }
+  .closing-line .icon {
+    font-size: 1.4rem;
+  }
+
+  /* ── SLIDE 13: Camera Animation Cards ── */
+  .cam-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 9px 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+    user-select: none;
+  }
+  .cam-card:hover { border-color: var(--accent2); background: rgba(6,182,212,0.08); }
+  .cam-card.active { border-color: var(--accent2); background: rgba(6,182,212,0.15); box-shadow: 0 0 14px rgba(6,182,212,0.2); }
+  .cam-card-icon { font-size: 1.15rem; width: 26px; text-align: center; flex-shrink: 0; }
+  .cam-card-name { font-size: 0.88rem; font-weight: 700; color: var(--text); }
+  .cam-card-desc { font-size: 0.72rem; color: var(--muted); margin-top: 1px; }
+
+  /* Keyframe animations applied to #cam-scene */
+  @keyframes cam-static {
+    0%,100% { transform: scale(1) translate(0,0); filter: brightness(1); }
+    50%      { transform: scale(1.005) translate(0,0); filter: brightness(1.05); }
+  }
+  @keyframes cam-pan {
+    0%   { transform: translate(0%, 0); }
+    50%  { transform: translate(-12%, 0); }
+    100% { transform: translate(0%, 0); }
+  }
+  @keyframes cam-tilt {
+    0%   { transform: translate(0, 0%); }
+    50%  { transform: translate(0, -12%); }
+    100% { transform: translate(0, 0%); }
+  }
+  @keyframes cam-zoomin {
+    0%   { transform: scale(1) translate(0,0); }
+    100% { transform: scale(1.45) translate(0, 5%); }
+  }
+  @keyframes cam-zoomout {
+    0%   { transform: scale(1.45) translate(0, 5%); }
+    100% { transform: scale(1) translate(0, 0); }
+  }
+  @keyframes cam-track {
+    0%   { transform: translate(8%, 0) scale(1.1); }
+    50%  { transform: translate(-8%, 0) scale(1.1); }
+    100% { transform: translate(8%, 0) scale(1.1); }
+  }
+  @keyframes cam-drone {
+    0%   { transform: scale(1.3) translate(0, 5%); }
+    100% { transform: scale(0.75) translate(0, -8%) rotate(2deg); }
+  }
+  @keyframes rec-blink {
+    0%,100% { opacity: 1; }
+    50%     { opacity: 0.2; }
+  }
+</style>
+</head>
+<body>
+
+<div id="progress-bar"></div>
+<div id="counter">1 / 36</div>
+
+<button class="nav-btn" id="btn-prev">&#8592;</button>
+<button class="nav-btn" id="btn-next">&#8594;</button>
+
+<div id="dots"></div>
+<div id="kbd-hint">← → Arrow keys to navigate<br>Space / Enter to advance</div>
+
+<div id="slides">
+
+<!-- SLIDE 1 -->
+<div class="slide slide-title active" id="s1">
+  <div class="tagline">Workshop 2026</div>
+  <h1>AI Content Creation<br><span class="accent">with CapCut</span></h1>
+  <h2>Building Storyboards, Images and Videos<br>Using Free AI Tools</h2>
+  <div class="divider" style="margin: 24px auto 0;"></div>
+</div>
+
+<!-- SLIDE 2 -->
+<div class="slide slide-content" id="s2">
+  <div class="tagline">Session Goal</div>
+  <h3>Training Objective</h3>
+  <p style="margin-bottom:16px;">By the end of this session, participants will be able to:</p>
+  <ul class="bullet-list">
+    <li>Understand AI content creation workflow</li>
+    <li>Generate content ideas using AI</li>
+    <li>Create storyboards using AI</li>
+    <li>Generate images using Google Nano Banana</li>
+    <li>Generate video scenes using Qwen, WAN AI, LumaLabs and Meta AI</li>
+    <li>Assemble content using CapCut</li>
+    <li>Export professional ready content</li>
+  </ul>
+</div>
+
+<!-- SLIDE 3 -->
+<div class="slide slide-title" id="s3">
+  <div class="tagline">The Big Picture</div>
+  <h3>The Modern Content Creation Pipeline</h3>
+  <div class="pipeline">
+    <div class="pipe-step">💡 IDEA</div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-step">📋 STORYBOARD</div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-step">🎨 VISUAL CREATION</div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-step">🎬 VIDEO GENERATION</div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-step">✂️ EDITING</div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-step">✨ POLISHING</div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-step">📤 EXPORT</div>
+  </div>
+  <div class="highlight-card" style="margin-top:28px;">
+    <p style="text-align:center; color:var(--accent2); font-weight:600;">Today we will build this entire pipeline.</p>
+  </div>
+</div>
+
+<!-- SLIDE 4 -->
+<div class="slide slide-content" id="s4">
+  <div class="tagline">Your Toolkit</div>
+  <h3>Tools We Will Use Today</h3>
+  <div class="tool-grid">
+    <div class="tool-card">
+      <div class="label">Idea &amp; Script</div>
+      <div class="tools">
+        <div class="tool-item">ChatGPT</div>
+      </div>
+    </div>
+    <div class="tool-card">
+      <div class="label">Image Creation</div>
+      <div class="tools">
+        <div class="tool-item">Google Nano Banana</div>
+      </div>
+    </div>
+    <div class="tool-card">
+      <div class="label">Video Generation</div>
+      <div class="tools">
+        <div class="tool-item">Qwen</div>
+        <div class="tool-item">WAN AI</div>
+        <div class="tool-item">LumaLabs</div>
+        <div class="tool-item">Meta AI</div>
+      </div>
+    </div>
+    <div class="tool-card">
+      <div class="label">Video Assembly</div>
+      <div class="tools">
+        <div class="tool-item">CapCut</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 5 -->
+<div class="slide slide-content" id="s5">
+  <div class="tagline">Prompting 101</div>
+  <h3>Prompt Basics</h3>
+  <p>Good AI output depends on good instructions.</p>
+  <div class="formula">Subject + Action + Style + Camera + Mood</div>
+  <p style="margin-top:18px; font-size:0.85rem; color:var(--muted); letter-spacing:0.08em; text-transform:uppercase;">Example prompt:</p>
+  <div class="prompt-box">A young professional working on laptop, modern office, cinematic lighting, shallow depth of field, realistic</div>
+</div>
+
+<!-- SLIDE 6 -->
+<div class="slide slide-content" id="s6">
+  <div class="tagline">Advanced Technique</div>
+  <h3>Reverse Prompting</h3>
+  <p>Analyzing a good image or video and asking: <span style="color:var(--accent2);">"What prompt created this?"</span></p>
+  <div class="steps-flow" style="margin-top:20px;">
+    <div class="step-item"><div class="step-num">1</div><div class="step-text">Describe the image</div></div>
+    <div class="step-item"><div class="step-num">2</div><div class="step-text">Extract the style</div></div>
+    <div class="step-item"><div class="step-num">3</div><div class="step-text">Rebuild the prompt</div></div>
+  </div>
+  <div class="highlight-card">
+    <p>This technique <strong>improves prompt quality</strong> by learning from output you already like.</p>
+  </div>
+</div>
+
+<!-- SLIDE 7 -->
+<div class="slide slide-content" id="s7">
+  <div class="tagline">Planning</div>
+  <h3>Storyboard Creation Using AI</h3>
+  <p>Before generating visuals, we plan the story.</p>
+  <div class="steps-flow" style="margin-top:14px;">
+    <div class="step-item"><div class="step-num">1</div><div class="step-text">Scene 1 — <span class="accent">Hook</span></div></div>
+    <div class="step-item"><div class="step-num">2</div><div class="step-text">Scene 2 — <span class="accent">Problem</span></div></div>
+    <div class="step-item"><div class="step-num">3</div><div class="step-text">Scene 3 — <span class="accent">Solution</span></div></div>
+    <div class="step-item"><div class="step-num">4</div><div class="step-text">Scene 4 — <span class="accent">Demonstration</span></div></div>
+    <div class="step-item"><div class="step-num">5</div><div class="step-text">Scene 5 — <span class="accent">Ending</span></div></div>
+  </div>
+  <p style="margin-top:14px;">AI can generate this instantly.</p>
+</div>
+
+<!-- SLIDE 8 -->
+<div class="slide slide-content" id="s8">
+  <div class="tagline">Prompt Example</div>
+  <h3>Example Storyboard Prompt</h3>
+  <div class="prompt-box">Create a 5 scene storyboard for a short video about using AI to improve workplace productivity.
+
+Include:
+• Hook
+• Problem
+• Solution
+• Example
+• Call to action</div>
+</div>
+
+<!-- SLIDE 9 -->
+<div class="slide slide-content" id="s9">
+  <div class="tagline">Image Generation</div>
+  <h3>Image Generation Using Google Nano Banana</h3>
+  <div class="two-col">
+    <div class="col-block">
+      <div class="col-title">Use to create</div>
+      <ul class="bullet-list">
+        <li>Characters</li>
+        <li>Background scenes</li>
+        <li>Objects</li>
+        <li>Visual storytelling assets</li>
+      </ul>
+    </div>
+    <div class="col-block">
+      <div class="col-title">Best prompt structure</div>
+      <ul class="bullet-list">
+        <li>Subject</li>
+        <li>Environment</li>
+        <li>Style</li>
+        <li>Lighting</li>
+        <li>Camera angle</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 10 -->
+<div class="slide slide-content" id="s10">
+  <div class="tagline">Image Prompt</div>
+  <h3>Image Prompt Example</h3>
+  <div class="prompt-box">Professional Malaysian team discussing ideas in a modern office, natural lighting, realistic, soft shadows, cinematic</div>
+  <div class="badge-row" style="margin-top: 20px;">
+    <div class="badge cyan">Subject</div>
+    <div class="badge cyan">Environment</div>
+    <div class="badge cyan">Lighting</div>
+    <div class="badge cyan">Style</div>
+    <div class="badge cyan">Camera Feel</div>
+  </div>
+</div>
+
+<!-- SLIDE 11 -->
+<div class="slide slide-content" id="s11">
+  <div class="tagline">Video Generation</div>
+  <h3>Video Scene Generation</h3>
+  <p style="margin-bottom:14px;">Generate short scenes — not full videos.</p>
+  <div class="two-col">
+    <div class="col-block">
+      <div class="col-title">Generate</div>
+      <ul class="bullet-list">
+        <li>Scene clips</li>
+        <li>Motion shots</li>
+        <li>B-roll</li>
+        <li>Background movement</li>
+      </ul>
+    </div>
+    <div class="col-block">
+      <div class="col-title">Tools</div>
+      <ul class="bullet-list">
+        <li>Qwen</li>
+        <li>WAN AI</li>
+        <li>LumaLabs</li>
+        <li>Meta AI</li>
+      </ul>
+    </div>
+  </div>
+  <div class="formula" style="margin-top:16px;">Character + Action + Environment + Camera + Mood + Duration</div>
+  <div class="prompt-box" style="margin-top:12px;">Young executive walking into office confidently, cinematic camera movement, modern workspace, professional lighting</div>
+</div>
+
+<!-- SLIDE 12 -->
+<div class="slide slide-content" id="s12">
+  <div class="tagline">Cinematography</div>
+  <h3>Camera Angles for Better AI Visuals</h3>
+  <ul class="bullet-list">
+    <li><strong>Eye level</strong> — natural perspective</li>
+    <li><strong>Low angle</strong> — power and confidence</li>
+    <li><strong>High angle</strong> — vulnerability or overview</li>
+    <li><strong>Over the shoulder</strong> — conversation scenes</li>
+    <li><strong>Top down</strong> — workflow or desk shots</li>
+    <li><strong>Close up</strong> — emotion or detail</li>
+    <li><strong>Wide shot</strong> — environment context</li>
+  </ul>
+</div>
+
+<!-- SLIDE 13 -->
+<div class="slide" id="s13" style="flex-direction:row;align-items:center;padding:40px 70px;gap:26px;">
+
+  <!-- Left: Viewfinder -->
+  <div style="display:flex;flex-direction:column;flex:0 0 58%;min-width:0;">
+    <div class="tagline" style="margin-bottom:10px;">Cinematography</div>
+    <div style="font-size:clamp(1.1rem,2vw,1.5rem);font-weight:700;margin-bottom:12px;color:var(--text);">Camera Movement Types</div>
+
+    <!-- Camera viewfinder -->
+    <div style="position:relative;width:100%;aspect-ratio:16/9;border-radius:10px;overflow:hidden;background:#060610;border:2px solid #2d2d3d;">
+
+      <!-- Animated scene layer -->
+      <div id="cam-scene" style="position:absolute;inset:-15%;width:130%;height:130%;transform-origin:center center;will-change:transform;">
+        <svg viewBox="0 0 800 450" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;display:block;">
+          <defs>
+            <linearGradient id="wallGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#0c0c1a"/><stop offset="100%" stop-color="#111122"/>
+            </linearGradient>
+            <linearGradient id="skyGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#0d1b2a"/><stop offset="100%" stop-color="#1a2f4a"/>
+            </linearGradient>
+            <radialGradient id="monitorGlow" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#7c3aed" stop-opacity="0.25"/>
+              <stop offset="100%" stop-color="#7c3aed" stop-opacity="0"/>
+            </radialGradient>
+          </defs>
+          <!-- Room -->
+          <rect width="800" height="450" fill="url(#wallGrad)"/>
+          <rect y="300" width="800" height="150" fill="#0e0e1c"/>
+          <!-- Window -->
+          <rect x="60" y="40" width="210" height="200" rx="4" fill="url(#skyGrad)" stroke="#1e3a5c" stroke-width="3"/>
+          <line x1="165" y1="40" x2="165" y2="240" stroke="#1e3a5c" stroke-width="3"/>
+          <line x1="60" y1="140" x2="270" y2="140" stroke="#1e3a5c" stroke-width="3"/>
+          <!-- City lights -->
+          <rect x="75"  y="162" width="9"  height="16" fill="#f59e0b" opacity="0.75"/>
+          <rect x="92"  y="155" width="9"  height="23" fill="#f59e0b" opacity="0.55"/>
+          <rect x="110" y="168" width="9"  height="10" fill="#f59e0b" opacity="0.8"/>
+          <rect x="128" y="152" width="9"  height="26" fill="#06b6d4" opacity="0.45"/>
+          <rect x="146" y="160" width="9"  height="18" fill="#f59e0b" opacity="0.65"/>
+          <rect x="185" y="164" width="9"  height="14" fill="#f59e0b" opacity="0.55"/>
+          <rect x="202" y="156" width="9"  height="22" fill="#06b6d4" opacity="0.4"/>
+          <rect x="220" y="163" width="9"  height="15" fill="#f59e0b" opacity="0.7"/>
+          <!-- Desk -->
+          <rect x="330" y="268" width="440" height="14" rx="4" fill="#1c1c2e"/>
+          <rect x="350" y="282" width="14"  height="80" fill="#141422"/>
+          <rect x="736" y="282" width="14"  height="80" fill="#141422"/>
+          <!-- Monitor -->
+          <rect x="450" y="150" width="220" height="130" rx="6" fill="#09090f" stroke="#252538" stroke-width="2"/>
+          <rect x="460" y="160" width="200" height="108" rx="4" fill="#0a1628"/>
+          <!-- Screen glow -->
+          <ellipse cx="560" cy="215" rx="110" ry="60" fill="url(#monitorGlow)"/>
+          <!-- Code lines -->
+          <rect x="468" y="172" width="90"  height="5" rx="2" fill="#7c3aed" opacity="0.8"/>
+          <rect x="468" y="184" width="135" height="5" rx="2" fill="#06b6d4" opacity="0.65"/>
+          <rect x="468" y="196" width="70"  height="5" rx="2" fill="#f59e0b" opacity="0.55"/>
+          <rect x="468" y="208" width="110" height="5" rx="2" fill="#7c3aed" opacity="0.65"/>
+          <rect x="468" y="220" width="150" height="5" rx="2" fill="#06b6d4" opacity="0.5"/>
+          <rect x="468" y="232" width="95"  height="5" rx="2" fill="#f59e0b" opacity="0.45"/>
+          <rect x="468" y="244" width="115" height="5" rx="2" fill="#7c3aed" opacity="0.55"/>
+          <!-- Monitor stand -->
+          <rect x="555" y="280" width="18"  height="16" fill="#141422"/>
+          <rect x="540" y="294" width="48"  height="7"  rx="3" fill="#141422"/>
+          <!-- Keyboard -->
+          <rect x="460" y="255" width="130" height="11" rx="3" fill="#181828"/>
+          <!-- Person -->
+          <circle cx="560" cy="118" r="30" fill="#181828"/>
+          <path   d="M505 175 Q528 163 560 160 Q592 163 615 175 L626 268 L494 268 Z" fill="#141422"/>
+          <path   d="M505 200 Q485 240 468 262" stroke="#181828" stroke-width="20" stroke-linecap="round" fill="none"/>
+          <!-- Bookshelf -->
+          <rect x="670" y="50" width="110" height="200" rx="4" fill="#0f0f1e"/>
+          <rect x="670" y="50"  width="110" height="7"  fill="#18182c"/>
+          <rect x="670" y="115" width="110" height="7"  fill="#18182c"/>
+          <rect x="670" y="180" width="110" height="7"  fill="#18182c"/>
+          <rect x="675" y="59" width="13"  height="52" fill="#7c3aed" opacity="0.7"/>
+          <rect x="691" y="59" width="11"  height="52" fill="#06b6d4" opacity="0.6"/>
+          <rect x="705" y="59" width="15"  height="52" fill="#f59e0b" opacity="0.55"/>
+          <rect x="723" y="59" width="11"  height="52" fill="#7c3aed" opacity="0.45"/>
+          <rect x="737" y="59" width="13"  height="52" fill="#06b6d4" opacity="0.65"/>
+          <rect x="753" y="59" width="17"  height="52" fill="#f59e0b" opacity="0.7"/>
+          <rect x="675" y="123" width="15"  height="52" fill="#06b6d4" opacity="0.55"/>
+          <rect x="693" y="123" width="11"  height="52" fill="#7c3aed" opacity="0.7"/>
+          <rect x="707" y="123" width="17"  height="52" fill="#f59e0b" opacity="0.45"/>
+          <!-- Ceiling light -->
+          <rect x="350" y="0" width="100" height="6" rx="3" fill="#ffffff" opacity="0.08"/>
+          <ellipse cx="400" cy="10" rx="180" ry="60" fill="#ffffff" opacity="0.025"/>
+        </svg>
+      </div>
+
+      <!-- Camera frame overlay -->
+      <div style="position:absolute;inset:0;pointer-events:none;z-index:5;">
+        <div style="position:absolute;top:7px;left:7px;width:18px;height:18px;border-top:2px solid rgba(255,255,255,0.55);border-left:2px solid rgba(255,255,255,0.55);"></div>
+        <div style="position:absolute;top:7px;right:7px;width:18px;height:18px;border-top:2px solid rgba(255,255,255,0.55);border-right:2px solid rgba(255,255,255,0.55);"></div>
+        <div style="position:absolute;bottom:7px;left:7px;width:18px;height:18px;border-bottom:2px solid rgba(255,255,255,0.55);border-left:2px solid rgba(255,255,255,0.55);"></div>
+        <div style="position:absolute;bottom:7px;right:7px;width:18px;height:18px;border-bottom:2px solid rgba(255,255,255,0.55);border-right:2px solid rgba(255,255,255,0.55);"></div>
+        <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:16px;height:16px;">
+          <div style="position:absolute;top:50%;left:0;right:0;height:1px;background:rgba(255,255,255,0.18);"></div>
+          <div style="position:absolute;left:50%;top:0;bottom:0;width:1px;background:rgba(255,255,255,0.18);"></div>
+        </div>
+        <!-- REC badge -->
+        <div id="rec-badge" style="position:absolute;top:9px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:5px;font-size:10px;font-family:monospace;color:rgba(255,255,255,0.6);letter-spacing:0.1em;opacity:0;transition:opacity 0.3s;">
+          <div id="rec-dot" style="width:7px;height:7px;background:#ef4444;border-radius:50%;animation:rec-blink 1s infinite;"></div>REC
+        </div>
+        <!-- Shot label -->
+        <div id="shot-label" style="position:absolute;bottom:9px;left:50%;transform:translateX(-50%);font-size:10px;font-family:monospace;color:rgba(255,255,255,0.5);letter-spacing:0.12em;white-space:nowrap;"></div>
+      </div>
+
+      <!-- Vignette -->
+      <div style="position:absolute;inset:0;background:radial-gradient(ellipse at center,transparent 45%,rgba(0,0,0,0.75) 100%);pointer-events:none;z-index:4;"></div>
+    </div>
+
+    <div style="text-align:center;margin-top:7px;font-size:10px;color:rgba(148,163,184,0.45);letter-spacing:0.1em;">CLICK A CARD TO PREVIEW THE MOVEMENT</div>
+  </div>
+
+  <!-- Right: Cards -->
+  <div style="flex:1;display:flex;flex-direction:column;gap:7px;justify-content:center;">
+    <div class="cam-card" data-anim="static"  data-label="STATIC SHOT"    data-dur="2000"><div class="cam-card-icon">⬛</div><div><div class="cam-card-name">Static Shot</div><div class="cam-card-desc">stable and clean</div></div></div>
+    <div class="cam-card" data-anim="pan"     data-label="PAN →"          data-dur="2800"><div class="cam-card-icon">↔</div><div><div class="cam-card-name">Pan</div><div class="cam-card-desc">left to right movement</div></div></div>
+    <div class="cam-card" data-anim="tilt"    data-label="TILT ↕"         data-dur="2800"><div class="cam-card-icon">↕</div><div><div class="cam-card-name">Tilt</div><div class="cam-card-desc">up and down movement</div></div></div>
+    <div class="cam-card" data-anim="zoomin"  data-label="ZOOM IN +"      data-dur="2200"><div class="cam-card-icon">🔍</div><div><div class="cam-card-name">Zoom In</div><div class="cam-card-desc">focus attention</div></div></div>
+    <div class="cam-card" data-anim="zoomout" data-label="ZOOM OUT −"     data-dur="2200"><div class="cam-card-icon">🔎</div><div><div class="cam-card-name">Zoom Out</div><div class="cam-card-desc">reveal context</div></div></div>
+    <div class="cam-card" data-anim="track"   data-label="TRACKING →→"    data-dur="3000"><div class="cam-card-icon">⇥</div><div><div class="cam-card-name">Tracking Shot</div><div class="cam-card-desc">follow subject</div></div></div>
+    <div class="cam-card" data-anim="drone"   data-label="DRONE PULL-BACK" data-dur="2600"><div class="cam-card-icon">⬆</div><div><div class="cam-card-name">Drone Shot</div><div class="cam-card-desc">cinematic feel</div></div></div>
+  </div>
+
+</div>
+
+<!-- SLIDE 14 -->
+<div class="slide slide-content" id="s14">
+  <div class="tagline">Prompt Formula</div>
+  <h3>Prompt Formula for Camera Angles</h3>
+  <div class="formula">Subject + Action + Environment + Camera Angle + Lighting + Style</div>
+  <div class="prompt-box" style="margin-top:20px;">Young professional presenting ideas in meeting room, low angle shot, cinematic lighting, realistic</div>
+</div>
+
+<!-- SLIDE 15 -->
+<div class="slide slide-content" id="s15">
+  <div class="tagline">Prompt Examples</div>
+  <h3>Camera Angle Prompt Examples</h3>
+  <div class="prompt-box" style="font-size:0.82rem; line-height:2;">Eye level: Malaysian content creator talking to camera, eye level shot, natural lighting, realistic
+
+Low angle: Entrepreneur standing confidently in office, low angle cinematic shot, dramatic lighting
+
+High angle: Designer working on laptop, high angle view, modern desk setup, soft lighting
+
+Close up: Close up of hands typing on laptop, shallow depth of field, cinematic lighting
+
+Wide shot: Team brainstorming in modern office, wide shot, natural lighting, realistic
+
+Over shoulder: Over the shoulder shot of designer editing video on laptop, cinematic lighting
+
+Top down: Top down view of workspace with laptop, coffee and notebook, clean minimalist setup</div>
+</div>
+
+<!-- SLIDE 16 -->
+<div class="slide slide-content" id="s16">
+  <div class="tagline">Level Up</div>
+  <h3>Advanced Prompt Enhancers</h3>
+  <p>Add these keywords to improve realism:</p>
+  <div class="badge-row" style="margin-top:20px;">
+    <div class="badge purple">cinematic</div>
+    <div class="badge purple">shallow depth of field</div>
+    <div class="badge purple">bokeh</div>
+    <div class="badge purple">4K</div>
+    <div class="badge purple">professional lighting</div>
+    <div class="badge purple">soft shadows</div>
+    <div class="badge purple">photorealistic</div>
+    <div class="badge purple">natural color grading</div>
+  </div>
+</div>
+
+<!-- SLIDE 17 -->
+<div class="slide slide-content" id="s17">
+  <div class="tagline">Pro Tip</div>
+  <h3>Professional Creator Tip</h3>
+  <p>If your image looks flat, add:</p>
+  <div class="badge-row" style="margin-top:16px;">
+    <div class="badge amber">cinematic angle</div>
+    <div class="badge amber">professional lighting</div>
+    <div class="badge amber">depth of field</div>
+    <div class="badge amber">35mm lens</div>
+    <div class="badge amber">85mm portrait lens</div>
+  </div>
+  <div class="highlight-card">
+    <p>These keywords <strong style="color:var(--accent3);">dramatically improve quality</strong> without changing your subject.</p>
+  </div>
+</div>
+
+<!-- SLIDE 18 -->
+<div class="slide slide-content" id="s18">
+  <div class="tagline">Assembly Tool</div>
+  <h3>CapCut Fundamentals</h3>
+  <p>CapCut is your content assembly tool.</p>
+  <ul class="bullet-list" style="margin-top:16px;">
+    <li>Combine scenes</li>
+    <li>Add text</li>
+    <li>Add captions</li>
+    <li>Add music</li>
+    <li>Add transitions</li>
+    <li>Export final video</li>
+  </ul>
+</div>
+
+<!-- SLIDE 19 -->
+<div class="slide slide-content" id="s19">
+  <div class="tagline">CapCut</div>
+  <h3>CapCut Interface Basics</h3>
+  <p>Focus only on these 5 key areas:</p>
+  <div class="steps-flow" style="margin-top:16px;">
+    <div class="step-item"><div class="step-num">1</div><div class="step-text">Media Panel</div></div>
+    <div class="step-item"><div class="step-num">2</div><div class="step-text">Preview Window</div></div>
+    <div class="step-item"><div class="step-num">3</div><div class="step-text">Timeline</div></div>
+    <div class="step-item"><div class="step-num">4</div><div class="step-text">Toolbar</div></div>
+    <div class="step-item"><div class="step-num">5</div><div class="step-text">Properties Panel</div></div>
+  </div>
+</div>
+
+<!-- SLIDE 20 -->
+<div class="slide slide-content" id="s20">
+  <div class="tagline">CapCut</div>
+  <h3>Importing Media</h3>
+  <div class="two-col">
+    <div class="col-block">
+      <div class="col-title">Import Types</div>
+      <ul class="bullet-list">
+        <li>AI images</li>
+        <li>AI video clips</li>
+        <li>Music</li>
+        <li>Voiceover</li>
+        <li>Logos</li>
+      </ul>
+    </div>
+    <div class="col-block">
+      <div class="col-title">Steps</div>
+      <div class="steps-flow">
+        <div class="step-item"><div class="step-num">1</div><div class="step-text">Import</div></div>
+        <div class="step-item"><div class="step-num">2</div><div class="step-text">Drag to media</div></div>
+        <div class="step-item"><div class="step-num">3</div><div class="step-text">Drag to timeline</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 21 -->
+<div class="slide slide-content" id="s21">
+  <div class="tagline">CapCut</div>
+  <h3>Timeline Basics</h3>
+  <p>Timeline represents your story.</p>
+  <ul class="bullet-list" style="margin-top:16px;">
+    <li>Move clips</li>
+    <li>Trim clips</li>
+    <li>Split clips</li>
+    <li>Delete clips</li>
+    <li>Duplicate clips</li>
+  </ul>
+</div>
+
+<!-- SLIDE 22 -->
+<div class="slide slide-content" id="s22">
+  <div class="tagline">CapCut</div>
+  <h3>Cutting and Trimming</h3>
+  <div class="steps-flow" style="margin-top:10px;">
+    <div class="step-item"><div class="step-num">✂</div><div class="step-text"><strong>Split</strong> — break scenes at any point</div></div>
+    <div class="step-item"><div class="step-num">⟷</div><div class="step-text"><strong>Trim</strong> — adjust clip timing</div></div>
+    <div class="step-item"><div class="step-num">🗑</div><div class="step-text"><strong>Delete</strong> — remove mistakes</div></div>
+  </div>
+  <div class="formula" style="margin-top:20px;">Shortcut: CTRL + B</div>
+</div>
+
+<!-- SLIDE 23 -->
+<div class="slide slide-content" id="s23">
+  <div class="tagline">CapCut</div>
+  <h3>Adding Text</h3>
+  <div class="two-col">
+    <div class="col-block">
+      <div class="col-title">Use text for</div>
+      <ul class="bullet-list">
+        <li>Hooks</li>
+        <li>Key points</li>
+        <li>Captions</li>
+        <li>Titles</li>
+        <li>Call to action</li>
+      </ul>
+    </div>
+    <div class="col-block">
+      <div class="col-title">Best practices</div>
+      <ul class="bullet-list">
+        <li>Short text</li>
+        <li>Large font</li>
+        <li>High contrast</li>
+        <li>Center focus</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 24 -->
+<div class="slide slide-content" id="s24">
+  <div class="tagline">CapCut AI</div>
+  <h3>Auto Captions</h3>
+  <p>CapCut AI can generate subtitles, sync speech, and translate captions.</p>
+  <div class="steps-flow" style="margin-top:18px;">
+    <div class="step-item"><div class="step-num">1</div><div class="step-text">Click <strong>Text</strong></div></div>
+    <div class="step-item"><div class="step-num">2</div><div class="step-text">Click <strong>Auto captions</strong></div></div>
+    <div class="step-item"><div class="step-num">3</div><div class="step-text">Click <strong>Generate</strong></div></div>
+  </div>
+</div>
+
+<!-- SLIDE 25 -->
+<div class="slide slide-content" id="s25">
+  <div class="tagline">CapCut</div>
+  <h3>Audio Basics</h3>
+  <div class="two-col">
+    <div class="col-block">
+      <div class="col-title">Add</div>
+      <ul class="bullet-list">
+        <li>Background music</li>
+        <li>Sound effects</li>
+        <li>Voice narration</li>
+      </ul>
+    </div>
+    <div class="col-block">
+      <div class="col-title">Recommended Levels</div>
+      <div class="steps-flow">
+        <div class="step-item"><div class="step-num" style="background:var(--surface2); color:var(--muted);">🎵</div><div class="step-text">Music: <strong>10–20%</strong></div></div>
+        <div class="step-item"><div class="step-num" style="background:var(--surface2); color:var(--muted);">🎙</div><div class="step-text">Voice: <strong>80–100%</strong></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 26 -->
+<div class="slide slide-content" id="s26">
+  <div class="tagline">CapCut</div>
+  <h3>Transitions</h3>
+  <p>Use simple transitions:</p>
+  <div class="badge-row" style="margin-top:16px;">
+    <div class="badge cyan">Fade</div>
+    <div class="badge cyan">Slide</div>
+    <div class="badge cyan">Zoom</div>
+    <div class="badge cyan">Blur</div>
+  </div>
+  <div class="highlight-card">
+    <p style="text-align:center; font-size:1.2rem; font-weight:700; color:var(--accent2);">Clean beats fancy.</p>
+  </div>
+</div>
+
+<!-- SLIDE 27 -->
+<div class="slide slide-content" id="s27">
+  <div class="tagline">CapCut</div>
+  <h3>Effects</h3>
+  <div class="two-col">
+    <div class="col-block">
+      <div class="col-title">Examples</div>
+      <ul class="bullet-list">
+        <li>Color filters</li>
+        <li>Glow text</li>
+        <li>Blur background</li>
+        <li>Motion effects</li>
+      </ul>
+    </div>
+    <div class="col-block">
+      <div class="col-title">Rule</div>
+      <div class="highlight-card" style="margin-top:0;">
+        <p style="text-align:center; font-size:1.1rem; font-weight:700; color:var(--accent3);">Maximum two effects.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 28 -->
+<div class="slide slide-content" id="s28">
+  <div class="tagline">CapCut AI</div>
+  <h3>CapCut AI Features</h3>
+  <div class="badge-row" style="margin-top:16px;">
+    <div class="badge purple">Auto captions</div>
+    <div class="badge purple">Background remover</div>
+    <div class="badge purple">AI voice</div>
+    <div class="badge purple">AI script</div>
+    <div class="badge purple">AI stickers</div>
+    <div class="badge purple">AI effects</div>
+  </div>
+  <div class="highlight-card">
+    <p style="text-align:center; font-weight:600;">AI <span style="color:var(--accent2);">accelerates production</span>.</p>
+  </div>
+</div>
+
+<!-- SLIDE 29 -->
+<div class="slide slide-content" id="s29">
+  <div class="tagline">Content Strategy</div>
+  <h3>Basic Viral Content Structure</h3>
+  <div class="steps-flow" style="margin-top:10px;">
+    <div class="step-item"><div class="step-num" style="background:var(--accent3); color:#000;">⚡</div><div class="step-text"><strong>Hook</strong> — first 3 seconds</div></div>
+    <div class="step-item"><div class="step-num">2</div><div class="step-text"><strong>Problem</strong></div></div>
+    <div class="step-item"><div class="step-num">3</div><div class="step-text"><strong>Solution</strong></div></div>
+    <div class="step-item"><div class="step-num">4</div><div class="step-text"><strong>Example</strong></div></div>
+    <div class="step-item"><div class="step-num">5</div><div class="step-text"><strong>Call to action</strong></div></div>
+  </div>
+</div>
+
+<!-- SLIDE 30 -->
+<div class="slide slide-content" id="s30">
+  <div class="tagline">Export</div>
+  <h3>Export Settings</h3>
+  <div class="two-col">
+    <div class="col-block">
+      <div class="col-title">Recommended</div>
+      <ul class="bullet-list">
+        <li>1080p resolution</li>
+        <li>30fps frame rate</li>
+        <li>MP4 format</li>
+      </ul>
+    </div>
+    <div class="col-block">
+      <div class="col-title">Aspect Ratios</div>
+      <ul class="bullet-list">
+        <li>TikTok — 9:16</li>
+        <li>Instagram — 9:16</li>
+        <li>YouTube — 16:9</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 31 -->
+<div class="slide slide-content" id="s31">
+  <div class="tagline">Watch Out</div>
+  <h3>Common Beginner Mistakes</h3>
+  <ul class="bullet-list" style="margin-top:10px;">
+    <li>Too many effects</li>
+    <li>Too much text</li>
+    <li>Music too loud</li>
+    <li>No hook</li>
+    <li>Scenes too long</li>
+  </ul>
+  <div class="highlight-card">
+    <p style="text-align:center; font-size:1.2rem; font-weight:700; color:var(--accent2);">Focus on clarity.</p>
+  </div>
+</div>
+
+<!-- SLIDE 32 -->
+<div class="slide slide-title" id="s32">
+  <div class="tagline">Full Workflow</div>
+  <h3>Full AI Workflow</h3>
+  <div class="pipeline" style="flex-direction:column; align-items:flex-start; gap:8px; margin-top:20px;">
+    <div style="display:flex; align-items:center; gap:12px; font-size:clamp(0.85rem,1.5vw,1rem);">
+      <span class="badge cyan" style="min-width:130px; text-align:center;">ChatGPT</span>
+      <span class="pipe-arrow">→</span><span>Idea</span>
+    </div>
+    <div style="display:flex; align-items:center; gap:12px; font-size:clamp(0.85rem,1.5vw,1rem);">
+      <span class="badge cyan" style="min-width:130px; text-align:center;">AI</span>
+      <span class="pipe-arrow">→</span><span>Storyboard</span>
+    </div>
+    <div style="display:flex; align-items:center; gap:12px; font-size:clamp(0.85rem,1.5vw,1rem);">
+      <span class="badge cyan" style="min-width:130px; text-align:center;">Nano Banana</span>
+      <span class="pipe-arrow">→</span><span>Images</span>
+    </div>
+    <div style="display:flex; align-items:center; gap:12px; font-size:clamp(0.85rem,1.5vw,1rem);">
+      <span class="badge cyan" style="min-width:130px; text-align:center;">Qwen / WAN / Luma</span>
+      <span class="pipe-arrow">→</span><span>Video</span>
+    </div>
+    <div style="display:flex; align-items:center; gap:12px; font-size:clamp(0.85rem,1.5vw,1rem);">
+      <span class="badge cyan" style="min-width:130px; text-align:center;">CapCut</span>
+      <span class="pipe-arrow">→</span><span>Assembly</span>
+    </div>
+    <div style="display:flex; align-items:center; gap:12px; font-size:clamp(0.85rem,1.5vw,1rem);">
+      <span class="badge cyan" style="min-width:130px; text-align:center;">CapCut AI</span>
+      <span class="pipe-arrow">→</span><span>Polish</span>
+    </div>
+    <div style="display:flex; align-items:center; gap:12px; font-size:clamp(0.85rem,1.5vw,1rem);">
+      <span class="badge cyan" style="min-width:130px; text-align:center;">Export</span>
+      <span class="pipe-arrow">→</span><span>Content</span>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 33 -->
+<div class="slide slide-content" id="s33">
+  <div class="tagline">Hands-On</div>
+  <h3>Practical Exercise</h3>
+  <p>Create a 5 scene video.</p>
+  <div class="two-col" style="margin-top:16px;">
+    <div class="col-block">
+      <div class="col-title">Requirements</div>
+      <ul class="bullet-list">
+        <li>1 AI image</li>
+        <li>1 AI video</li>
+        <li>Text hook</li>
+        <li>Music</li>
+        <li>Captions</li>
+      </ul>
+    </div>
+    <div class="col-block">
+      <div class="col-title">Remember</div>
+      <ul class="bullet-list">
+        <li>Plan storyboard first</li>
+        <li>Use prompt formula</li>
+        <li>Keep it simple</li>
+        <li>Hook in 3 seconds</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 34 -->
+<div class="slide slide-title" id="s34">
+  <div class="tagline">Mindset</div>
+  <h3>Creator Mindset</h3>
+  <div class="closing-lines" style="margin-top:24px;">
+    <div class="closing-line"><span class="icon">🧠</span> Story first. Tools second.</div>
+    <div class="closing-line"><span class="icon">📅</span> Consistency beats perfection.</div>
+    <div class="closing-line"><span class="icon">⚡</span> Speed beats overthinking.</div>
+    <div class="closing-line"><span class="icon">✅</span> Done is better than perfect.</div>
+  </div>
+</div>
+
+<!-- SLIDE 35 -->
+<div class="slide slide-content" id="s35">
+  <div class="tagline">Final Project</div>
+  <h3>Final Project</h3>
+  <p>Build a short AI generated content video using today's workflow.</p>
+  <div class="steps-flow" style="margin-top:18px;">
+    <div class="step-item"><div class="step-num">1</div><div class="step-text">Idea</div></div>
+    <div class="step-item"><div class="step-num">2</div><div class="step-text">Storyboard</div></div>
+    <div class="step-item"><div class="step-num">3</div><div class="step-text">Image</div></div>
+    <div class="step-item"><div class="step-num">4</div><div class="step-text">Video</div></div>
+    <div class="step-item"><div class="step-num">5</div><div class="step-text">Edit</div></div>
+    <div class="step-item"><div class="step-num">6</div><div class="step-text">Export</div></div>
+  </div>
+</div>
+
+<!-- SLIDE 36 -->
+<div class="slide slide-title" id="s36">
+  <div class="tagline">Thank You</div>
+  <h1 style="font-size:clamp(1.6rem,3.5vw,2.8rem);">AI does not replace creators.</h1>
+  <div class="divider" style="margin: 20px auto;"></div>
+  <div class="quote">
+    <span>AI amplifies creators.</span>
+  </div>
+  <div class="quote" style="margin-top:16px; color:var(--muted); font-size:clamp(0.9rem,1.8vw,1.2rem); font-weight:400;">
+    Your advantage is how you think.<br>Tools only execute your vision.
+  </div>
+</div>
+
+</div><!-- end #slides -->
+
+<script>
+  const totalSlides = 36;
+  let current = 1;
+  let isAnimating = false;
+
+  const slides = document.querySelectorAll('.slide');
+  const counter = document.getElementById('counter');
+  const progressBar = document.getElementById('progress-bar');
+  const dotsContainer = document.getElementById('dots');
+
+  // Create dots
+  for (let i = 1; i <= totalSlides; i++) {
+    const dot = document.createElement('div');
+    dot.className = 'dot' + (i === 1 ? ' active' : '');
+    dot.addEventListener('click', () => goTo(i));
+    dotsContainer.appendChild(dot);
+  }
+
+  function updateUI() {
+    counter.textContent = current + ' / ' + totalSlides;
+    progressBar.style.width = ((current / totalSlides) * 100) + '%';
+    document.querySelectorAll('.dot').forEach((d, i) => {
+      d.classList.toggle('active', i + 1 === current);
+    });
+  }
+
+  function goTo(n) {
+    if (isAnimating || n === current || n < 1 || n > totalSlides) return;
+    isAnimating = true;
+    const prev = slides[current - 1];
+    const next = slides[n - 1];
+    const forward = n > current;
+
+    prev.classList.remove('active');
+    prev.classList.add('exit');
+    if (!forward) {
+      prev.style.transform = 'translateX(60px)';
+      next.style.transform = 'translateX(-60px)';
+    } else {
+      prev.style.transform = '';
+      next.style.transform = '';
+    }
+
+    requestAnimationFrame(() => {
+      next.style.transition = 'none';
+      next.style.opacity = '0';
+      if (!forward) {
+        next.style.transform = 'translateX(-60px)';
+      } else {
+        next.style.transform = 'translateX(60px)';
+      }
+      requestAnimationFrame(() => {
+        next.style.transition = '';
+        next.style.opacity = '';
+        next.style.transform = '';
+        next.classList.add('active');
+      });
+    });
+
+    setTimeout(() => {
+      prev.classList.remove('exit');
+      prev.style.transform = '';
+      isAnimating = false;
+    }, 450);
+
+    current = n;
+    updateUI();
+  }
+
+  function next() { goTo(current + 1); }
+  function prev() { goTo(current - 1); }
+
+  document.getElementById('btn-next').addEventListener('click', next);
+  document.getElementById('btn-prev').addEventListener('click', prev);
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ' || e.key === 'Enter') {
+      e.preventDefault(); next();
+    } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+      e.preventDefault(); prev();
+    }
+  });
+
+  // Touch/swipe support
+  let touchStartX = 0;
+  document.addEventListener('touchstart', (e) => { touchStartX = e.touches[0].clientX; });
+  document.addEventListener('touchend', (e) => {
+    const dx = e.changedTouches[0].clientX - touchStartX;
+    if (Math.abs(dx) > 50) dx < 0 ? next() : prev();
+  });
+
+  updateUI();
+
+  // ── Slide 13: Camera animation logic ──
+  const camScene   = document.getElementById('cam-scene');
+  const recBadge   = document.getElementById('rec-badge');
+  const shotLabel  = document.getElementById('shot-label');
+  let camTimer     = null;
+
+  const easingMap = {
+    static:  'ease-in-out',
+    pan:     'cubic-bezier(0.45,0,0.55,1)',
+    tilt:    'cubic-bezier(0.45,0,0.55,1)',
+    zoomin:  'cubic-bezier(0.25,0,0.1,1)',
+    zoomout: 'cubic-bezier(0.25,0,0.1,1)',
+    track:   'cubic-bezier(0.45,0,0.55,1)',
+    drone:   'cubic-bezier(0.2,0,0.3,1)',
+  };
+
+  document.querySelectorAll('.cam-card').forEach(card => {
+    card.addEventListener('click', () => {
+      const anim = card.dataset.anim;
+      const dur  = parseInt(card.dataset.dur, 10);
+      const label = card.dataset.label;
+
+      // Highlight active card
+      document.querySelectorAll('.cam-card').forEach(c => c.classList.remove('active'));
+      card.classList.add('active');
+
+      // Clear any running animation
+      clearTimeout(camTimer);
+      camScene.style.animation = 'none';
+      camScene.style.transition = 'none';
+      void camScene.offsetWidth; // reflow
+
+      // Show REC + label
+      recBadge.style.opacity = '1';
+      shotLabel.textContent  = label;
+
+      // Apply animation
+      const easing = easingMap[anim] || 'ease-in-out';
+      camScene.style.animation = `cam-${anim} ${dur}ms ${easing} forwards`;
+
+      // Hide REC after animation ends
+      camTimer = setTimeout(() => {
+        recBadge.style.opacity = '0';
+        // Smoothly reset scene to neutral
+        camScene.style.animation = 'none';
+        camScene.style.transition = 'transform 0.8s ease';
+        camScene.style.transform  = 'translate(0,0) scale(1) rotate(0deg)';
+        setTimeout(() => { camScene.style.transition = 'none'; }, 850);
+        document.querySelectorAll('.cam-card').forEach(c => c.classList.remove('active'));
+      }, dur + 200);
+    });
+  });
+</script>
+</body>
+</html>
