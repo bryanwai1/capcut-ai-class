@@ -433,6 +433,330 @@
     font-size: 1.4rem;
   }
 
+  /* ── Slide Editor ── */
+  #btn-add-slide {
+    position: fixed;
+    bottom: 18px; left: 64px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    width: 38px; height: 38px;
+    border-radius: 9px;
+    cursor: pointer;
+    font-size: 1.3rem;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s;
+    z-index: 100;
+  }
+  #btn-add-slide:hover { background: rgba(6,182,212,0.25); color: #fff; border-color: var(--accent2); }
+
+  #editor-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(6px);
+    z-index: 400;
+    display: none;
+    align-items: center;
+    justify-content: center;
+  }
+  #editor-overlay.open { display: flex; }
+
+  #editor-modal {
+    background: #16161f;
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 28px 30px;
+    width: min(560px, 92vw);
+    max-height: 90vh;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    box-shadow: 0 24px 60px rgba(0,0,0,0.6);
+  }
+  #editor-modal h4 {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text);
+    margin: 0;
+  }
+  .editor-field label {
+    display: block;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 7px;
+  }
+  .editor-field input[type="text"],
+  .editor-field textarea {
+    width: 100%;
+    background: #0d0d14;
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    color: var(--text);
+    font-size: 0.92rem;
+    font-family: inherit;
+    padding: 10px 14px;
+    outline: none;
+    transition: border-color 0.2s;
+    resize: vertical;
+  }
+  .editor-field input[type="text"]:focus,
+  .editor-field textarea:focus { border-color: var(--accent2); }
+
+  #editor-img-drop {
+    border: 2px dashed var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: var(--muted);
+    font-size: 0.85rem;
+    position: relative;
+  }
+  #editor-img-drop:hover, #editor-img-drop.dragover { border-color: var(--accent2); color: var(--text); background: rgba(6,182,212,0.06); }
+  #editor-img-drop input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+  #editor-img-preview { max-width: 100%; max-height: 160px; border-radius: 8px; object-fit: contain; display: none; margin: 10px auto 0; }
+
+  .editor-field select {
+    width: 100%;
+    background: #0d0d14;
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    color: var(--text);
+    font-size: 0.92rem;
+    font-family: inherit;
+    padding: 10px 14px;
+    outline: none;
+    cursor: pointer;
+  }
+
+  .editor-actions { display: flex; gap: 10px; justify-content: flex-end; }
+  .btn-cancel {
+    background: none; border: 1px solid var(--border);
+    color: var(--muted); padding: 9px 20px; border-radius: 9px;
+    cursor: pointer; font-size: 0.88rem; transition: all 0.2s;
+  }
+  .btn-cancel:hover { border-color: var(--muted); color: var(--text); }
+  .btn-create {
+    background: var(--accent2); border: none;
+    color: #000; font-weight: 700; padding: 9px 22px;
+    border-radius: 9px; cursor: pointer; font-size: 0.88rem; transition: all 0.2s;
+  }
+  .btn-create:hover { opacity: 0.85; }
+
+  /* ── Apps Slide ── */
+  .apps-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 14px;
+    width: 100%;
+    margin-top: 14px;
+  }
+  .app-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s;
+  }
+  .app-card:hover { border-color: var(--accent2); transform: translateY(-3px); box-shadow: 0 8px 24px rgba(6,182,212,0.15); }
+  .app-icon { font-size: 1.6rem; }
+  .app-name { font-size: clamp(0.8rem,1.2vw,1rem); font-weight: 700; color: var(--text); text-align: center; }
+  .app-desc { font-size: 0.7rem; color: var(--muted); text-align: center; letter-spacing: 0.05em; }
+  .app-qr {
+    width: 110px; height: 110px;
+    border-radius: 8px;
+    margin: 6px 0;
+    background: #fff;
+    padding: 4px;
+  }
+  .app-link {
+    font-size: clamp(0.6rem,0.9vw,0.75rem);
+    color: var(--accent2);
+    text-decoration: none;
+    text-align: center;
+    word-break: break-all;
+    line-height: 1.4;
+  }
+  .app-link:hover { text-decoration: underline; }
+
+  /* ── Drag to Reorder ── */
+  .thumb-item { position: relative; }
+  .thumb-drag-handle {
+    position: absolute; top: 5px; left: 5px; z-index: 10;
+    width: 22px; height: 22px;
+    background: rgba(0,0,0,0.55);
+    border-radius: 5px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 9px; color: rgba(255,255,255,0.6);
+    cursor: grab; line-height: 1;
+  }
+  .thumb-item[draggable="true"] { cursor: default; }
+  .thumb-item.drag-over { border-color: var(--accent3) !important; box-shadow: 0 0 14px rgba(245,158,11,0.5); }
+  .thumb-item.dragging { opacity: 0.4; }
+
+  /* ── Logos ── */
+  #btn-logo {
+    position: fixed; bottom: 18px; left: 110px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    width: 38px; height: 38px; border-radius: 9px;
+    cursor: pointer; font-size: 0.95rem;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s; z-index: 100;
+  }
+  #btn-logo:hover { background: rgba(245,158,11,0.25); color: var(--accent3); border-color: var(--accent3); }
+
+  #logo-panel {
+    position: fixed; bottom: 66px; left: 18px;
+    background: #16161f; border: 1px solid var(--border);
+    border-radius: 14px; padding: 16px 18px;
+    width: 290px; z-index: 200;
+    display: none; flex-direction: column; gap: 13px;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.55);
+  }
+  #logo-panel.open { display: flex; }
+  .logo-row { display: flex; flex-direction: column; gap: 6px; }
+  .logo-row label { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+  .logo-upload-area {
+    display: flex; align-items: center; gap: 10px;
+    background: #0d0d14; border: 1px dashed var(--border);
+    border-radius: 9px; padding: 8px 12px;
+    cursor: pointer; position: relative; overflow: hidden; transition: all 0.2s;
+  }
+  .logo-upload-area:hover { border-color: var(--accent3); }
+  .logo-upload-area input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+  .logo-upload-area span { font-size: 0.8rem; color: var(--muted); }
+  .logo-mini-preview { height: 26px; width: auto; max-width: 70px; object-fit: contain; display: none; border-radius: 4px; }
+  .logo-clear { background: none; border: none; color: #ef4444; font-size: 0.72rem; cursor: pointer; text-decoration: underline; display: none; align-self: flex-start; }
+
+  /* Logo overlay on slides */
+  #logo-overlay {
+    position: fixed; z-index: 90;
+    pointer-events: none;
+    display: none;
+    align-items: center; gap: 14px;
+    transition: all 0.5s ease, opacity 0.5s ease;
+  }
+  #logo-overlay.logo-corner {
+    bottom: 22px; right: 76px;
+    opacity: 0.4;
+    flex-direction: row;
+  }
+  #logo-overlay.logo-hero {
+    bottom: 90px; left: 50%; transform: translateX(-50%);
+    opacity: 0.9; flex-direction: row;
+  }
+  .logo-slide-img { height: 32px; width: auto; max-width: 130px; object-fit: contain; display: none; }
+  #logo-overlay.logo-hero .logo-slide-img { height: 54px; max-width: 180px; }
+
+  /* ── Slide Overview ── */
+  #btn-overview {
+    position: fixed;
+    bottom: 18px; left: 18px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    width: 38px; height: 38px;
+    border-radius: 9px;
+    cursor: pointer;
+    font-size: 1.05rem;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s;
+    z-index: 100;
+  }
+  #btn-overview:hover { background: rgba(124,58,237,0.3); color: #fff; border-color: var(--accent); }
+
+  #overview-panel {
+    position: fixed;
+    inset: 0;
+    background: rgba(5,5,14,0.97);
+    backdrop-filter: blur(14px);
+    z-index: 300;
+    display: none;
+    flex-direction: column;
+    padding: 22px 28px 30px;
+    overflow-y: auto;
+  }
+  #overview-panel.open { display: flex; }
+
+  #overview-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 18px;
+    flex-shrink: 0;
+  }
+  #overview-title {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--muted);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+  #btn-close-overview {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    width: 34px; height: 34px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s;
+  }
+  #btn-close-overview:hover { color: #fff; border-color: var(--accent); }
+
+  #overview-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+    gap: 12px;
+  }
+  .thumb-item {
+    cursor: pointer;
+    border-radius: 9px;
+    overflow: hidden;
+    border: 2px solid var(--border);
+    background: var(--surface);
+    transition: all 0.2s;
+  }
+  .thumb-item:hover { border-color: var(--accent2); transform: scale(1.04); }
+  .thumb-item.thumb-active { border-color: var(--accent); box-shadow: 0 0 16px rgba(124,58,237,0.45); }
+  .thumb-preview {
+    width: 100%;
+    aspect-ratio: 16/9;
+    overflow: hidden;
+    position: relative;
+    pointer-events: none;
+    background: var(--bg);
+  }
+  .thumb-inner {
+    position: absolute;
+    top: 0; left: 0;
+    width: 1280px; height: 720px;
+    transform-origin: top left;
+    pointer-events: none;
+  }
+  .thumb-label {
+    text-align: center;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--muted);
+    padding: 5px 0;
+    letter-spacing: 0.06em;
+    background: var(--surface2);
+  }
+  .thumb-active .thumb-label { color: var(--accent); }
+
   /* ── SLIDE 13: Camera Animation Cards ── */
   .cam-card {
     display: flex;
@@ -511,7 +835,57 @@
   <div class="divider" style="margin: 24px auto 0;"></div>
 </div>
 
-<!-- SLIDE 2 -->
+<!-- SLIDE 2 — Apps -->
+<div class="slide slide-content" id="s2-apps">
+  <div class="tagline">Download Before We Start</div>
+  <h3>Apps We Will Use Today</h3>
+  <div class="apps-grid">
+
+    <div class="app-card">
+      <div class="app-icon">🎨</div>
+      <div class="app-name">AI Image Editor</div>
+      <div class="app-desc">Image Generation</div>
+      <img class="app-qr" src="https://api.qrserver.com/v1/create-qr-code/?size=110x110&color=000000&bgcolor=ffffff&data=https%3A%2F%2Faiimageeditor.ai%2F" alt="QR">
+      <a class="app-link" href="https://aiimageeditor.ai/" target="_blank">aiimageeditor.ai</a>
+    </div>
+
+    <div class="app-card">
+      <div class="app-icon">⚡</div>
+      <div class="app-name">Arena AI</div>
+      <div class="app-desc">Image Generation</div>
+      <img class="app-qr" src="https://api.qrserver.com/v1/create-qr-code/?size=110x110&color=000000&bgcolor=ffffff&data=https%3A%2F%2Farena.ai%2Fimage%2Fdirect" alt="QR">
+      <a class="app-link" href="https://arena.ai/image/direct" target="_blank">arena.ai/image/direct</a>
+    </div>
+
+    <div class="app-card">
+      <div class="app-icon">🎬</div>
+      <div class="app-name">WAN AI</div>
+      <div class="app-desc">Video Generation</div>
+      <img class="app-qr" src="https://api.qrserver.com/v1/create-qr-code/?size=110x110&color=000000&bgcolor=ffffff&data=https%3A%2F%2Fcreate.wan.video%2F" alt="QR">
+      <a class="app-link" href="https://create.wan.video/" target="_blank">create.wan.video</a>
+    </div>
+
+    <div class="app-card">
+      <div class="app-icon">✨</div>
+      <div class="app-name">LumaLabs</div>
+      <div class="app-desc">Video Generation</div>
+      <img class="app-qr" src="https://api.qrserver.com/v1/create-qr-code/?size=110x110&color=000000&bgcolor=ffffff&data=https%3A%2F%2Fapp.lumalabs.ai%2F" alt="QR">
+      <a class="app-link" href="https://app.lumalabs.ai/" target="_blank">app.lumalabs.ai</a>
+    </div>
+
+    <div class="app-card">
+      <div class="app-icon">🤖</div>
+      <div class="app-name">Kie AI</div>
+      <div class="app-desc">AI Content Creation</div>
+      <img class="app-qr" src="https://api.qrserver.com/v1/create-qr-code/?size=110x110&color=000000&bgcolor=ffffff&data=https%3A%2F%2Fkie.ai%2F" alt="QR">
+      <a class="app-link" href="https://kie.ai/" target="_blank">kie.ai</a>
+    </div>
+
+  </div>
+  <p style="margin-top:16px;font-size:0.8rem;color:var(--muted);text-align:center;">Scan the QR code or click the link to open each app</p>
+</div>
+
+<!-- SLIDE 3 (was 2) -->
 <div class="slide slide-content" id="s2">
   <div class="tagline">Session Goal</div>
   <h3>Training Objective</h3>
@@ -1270,23 +1644,119 @@ Top down: Top down view of workspace with laptop, coffee and notebook, clean min
 
 </div><!-- end #slides -->
 
+<!-- Add Slide button -->
+<button id="btn-add-slide" title="Add new slide">+</button>
+
+<!-- Logo button -->
+<button id="btn-logo" title="Upload logos">🏷</button>
+
+<!-- Logo panel -->
+<div id="logo-panel">
+  <div style="display:flex;align-items:center;justify-content:space-between;">
+    <span style="font-size:0.82rem;font-weight:700;color:var(--text);">Logos</span>
+    <button id="btn-logo-close" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:1rem;">✕</button>
+  </div>
+  <div class="logo-row">
+    <label>Event Organiser</label>
+    <div class="logo-upload-area">
+      <input type="file" id="logo-org-input" accept="image/*">
+      <span id="logo-org-hint">📁 Upload logo</span>
+      <img id="logo-org-mini" class="logo-mini-preview" alt="">
+    </div>
+    <button class="logo-clear" id="logo-org-clear">Remove</button>
+  </div>
+  <div class="logo-row">
+    <label>Client</label>
+    <div class="logo-upload-area">
+      <input type="file" id="logo-client-input" accept="image/*">
+      <span id="logo-client-hint">📁 Upload logo</span>
+      <img id="logo-client-mini" class="logo-mini-preview" alt="">
+    </div>
+    <button class="logo-clear" id="logo-client-clear">Remove</button>
+  </div>
+  <p style="font-size:0.7rem;color:var(--muted);line-height:1.6;margin-top:2px;">Logos sit bottom-right on all slides. On slide 1 they appear larger and centred above the footer.</p>
+</div>
+
+<!-- Logo overlay (rendered on every slide) -->
+<div id="logo-overlay" class="logo-corner">
+  <img id="logo-slide-org"    class="logo-slide-img" alt="">
+  <img id="logo-slide-client" class="logo-slide-img" alt="">
+</div>
+
+<!-- Slide Editor Modal -->
+<div id="editor-overlay">
+  <div id="editor-modal">
+    <div style="display:flex;align-items:center;justify-content:space-between;">
+      <h4>New Slide</h4>
+      <button class="btn-cancel" id="btn-editor-close" style="padding:5px 10px;">✕</button>
+    </div>
+
+    <div class="editor-field">
+      <label>Title (optional)</label>
+      <input type="text" id="ed-title" placeholder="e.g. Key Takeaways">
+    </div>
+
+    <div class="editor-field">
+      <label>Body Text (optional) — one item per line for bullet list</label>
+      <textarea id="ed-body" rows="5" placeholder="Type your content here...&#10;Each new line becomes a bullet point"></textarea>
+    </div>
+
+    <div class="editor-field">
+      <label>Image (optional)</label>
+      <div id="editor-img-drop">
+        <input type="file" id="ed-img-input" accept="image/*">
+        <div id="ed-img-hint">📁 Click or drag an image here</div>
+        <img id="editor-img-preview" alt="preview">
+      </div>
+    </div>
+
+    <div class="editor-field">
+      <label>Insert position</label>
+      <select id="ed-position">
+        <option value="after">After current slide</option>
+        <option value="end">At the end</option>
+      </select>
+    </div>
+
+    <div class="editor-actions">
+      <button class="btn-cancel" id="btn-editor-cancel">Cancel</button>
+      <button class="btn-create" id="btn-editor-create">Add Slide</button>
+    </div>
+  </div>
+</div>
+
+<!-- Overview button -->
+<button id="btn-overview" title="Slide overview">⊞</button>
+
+<!-- Overview panel -->
+<div id="overview-panel">
+  <div id="overview-header">
+    <div id="overview-title">All Slides — click to jump</div>
+    <button id="btn-close-overview">✕</button>
+  </div>
+  <div id="overview-grid"></div>
+</div>
+
 <script>
-  const totalSlides = 36;
+  let totalSlides = 37;
   let current = 1;
   let isAnimating = false;
 
-  const slides = document.querySelectorAll('.slide');
+  let slides = document.querySelectorAll('.slide');
   const counter = document.getElementById('counter');
   const progressBar = document.getElementById('progress-bar');
   const dotsContainer = document.getElementById('dots');
 
-  // Create dots
-  for (let i = 1; i <= totalSlides; i++) {
-    const dot = document.createElement('div');
-    dot.className = 'dot' + (i === 1 ? ' active' : '');
-    dot.addEventListener('click', () => goTo(i));
-    dotsContainer.appendChild(dot);
+  function rebuildDots() {
+    dotsContainer.innerHTML = '';
+    for (let i = 1; i <= totalSlides; i++) {
+      const dot = document.createElement('div');
+      dot.className = 'dot' + (i === current ? ' active' : '');
+      dot.addEventListener('click', () => goTo(i));
+      dotsContainer.appendChild(dot);
+    }
   }
+  rebuildDots();
 
   function updateUI() {
     counter.textContent = current + ' / ' + totalSlides;
@@ -1294,6 +1764,7 @@ Top down: Top down view of workspace with laptop, coffee and notebook, clean min
     document.querySelectorAll('.dot').forEach((d, i) => {
       d.classList.toggle('active', i + 1 === current);
     });
+    if (typeof updateLogoPosition === 'function') updateLogoPosition();
   }
 
   function goTo(n) {
@@ -1346,6 +1817,7 @@ Top down: Top down view of workspace with laptop, coffee and notebook, clean min
   document.getElementById('btn-prev').addEventListener('click', prev);
 
   document.addEventListener('keydown', (e) => {
+    if (window.overviewOpen) return;
     if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ' || e.key === 'Enter') {
       e.preventDefault(); next();
     } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
@@ -1362,6 +1834,269 @@ Top down: Top down view of workspace with laptop, coffee and notebook, clean min
   });
 
   updateUI();
+
+  // ── Slide Editor ──
+  const editorOverlay = document.getElementById('editor-overlay');
+  let edImageDataUrl = null;
+
+  function openEditor() {
+    document.getElementById('ed-title').value = '';
+    document.getElementById('ed-body').value = '';
+    document.getElementById('ed-img-input').value = '';
+    document.getElementById('editor-img-preview').style.display = 'none';
+    document.getElementById('ed-img-hint').style.display = 'block';
+    edImageDataUrl = null;
+    editorOverlay.classList.add('open');
+  }
+  function closeEditor() { editorOverlay.classList.remove('open'); }
+
+  document.getElementById('btn-add-slide').addEventListener('click', openEditor);
+  document.getElementById('btn-editor-close').addEventListener('click', closeEditor);
+  document.getElementById('btn-editor-cancel').addEventListener('click', closeEditor);
+  editorOverlay.addEventListener('click', e => { if (e.target === editorOverlay) closeEditor(); });
+
+  // Image preview
+  document.getElementById('ed-img-input').addEventListener('change', function() {
+    const file = this.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+      edImageDataUrl = e.target.result;
+      const preview = document.getElementById('editor-img-preview');
+      preview.src = edImageDataUrl;
+      preview.style.display = 'block';
+      document.getElementById('ed-img-hint').style.display = 'none';
+    };
+    reader.readAsDataURL(file);
+  });
+
+  // Drag over style
+  const imgDrop = document.getElementById('editor-img-drop');
+  imgDrop.addEventListener('dragover', e => { e.preventDefault(); imgDrop.classList.add('dragover'); });
+  imgDrop.addEventListener('dragleave', () => imgDrop.classList.remove('dragover'));
+  imgDrop.addEventListener('drop', e => {
+    e.preventDefault();
+    imgDrop.classList.remove('dragover');
+    const file = e.dataTransfer.files[0];
+    if (!file || !file.type.startsWith('image/')) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      edImageDataUrl = ev.target.result;
+      const preview = document.getElementById('editor-img-preview');
+      preview.src = edImageDataUrl;
+      preview.style.display = 'block';
+      document.getElementById('ed-img-hint').style.display = 'none';
+    };
+    reader.readAsDataURL(file);
+  });
+
+  function escHtml(s) {
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  document.getElementById('btn-editor-create').addEventListener('click', () => {
+    const title   = document.getElementById('ed-title').value.trim();
+    const body    = document.getElementById('ed-body').value.trim();
+    const pos     = document.getElementById('ed-position').value;
+    if (!title && !body && !edImageDataUrl) { alert('Add at least a title, text, or image.'); return; }
+
+    // Build slide HTML
+    let inner = '';
+    if (title) inner += `<h3 style="margin-bottom:14px;">${escHtml(title)}</h3>`;
+    if (edImageDataUrl) inner += `<img src="${edImageDataUrl}" style="max-width:100%;max-height:52%;object-fit:contain;border-radius:12px;margin:10px 0;">`;
+    if (body) {
+      const lines = body.split('\n').map(l => l.trim()).filter(Boolean);
+      if (lines.length === 1) {
+        inner += `<p style="margin-top:10px;">${escHtml(lines[0])}</p>`;
+      } else {
+        inner += `<ul class="bullet-list" style="margin-top:10px;">${lines.map(l => `<li>${escHtml(l)}</li>`).join('')}</ul>`;
+      }
+    }
+
+    const newSlide = document.createElement('div');
+    newSlide.className = 'slide slide-content';
+    newSlide.innerHTML = inner;
+
+    const container = document.getElementById('slides');
+    const insertAfterIndex = pos === 'end' ? totalSlides : current;
+
+    const allSlides = container.querySelectorAll('.slide');
+    if (insertAfterIndex >= allSlides.length) {
+      container.appendChild(newSlide);
+    } else {
+      container.insertBefore(newSlide, allSlides[insertAfterIndex]);
+    }
+
+    totalSlides++;
+    slides = document.querySelectorAll('.slide');
+    rebuildDots();
+    closeEditor();
+    goTo(insertAfterIndex + 1);
+  });
+
+  // ── Slide Overview ──
+  window.overviewOpen = false;
+  const overviewPanel = document.getElementById('overview-panel');
+  const overviewGrid  = document.getElementById('overview-grid');
+
+  let dragSrcIdx = null;
+
+  function buildOverview() {
+    overviewGrid.innerHTML = '';
+    slides.forEach((slide, i) => {
+      const n = i + 1;
+      const item = document.createElement('div');
+      item.className = 'thumb-item' + (n === current ? ' thumb-active' : '');
+      item.draggable = true;
+
+      // Drag handle
+      const handle = document.createElement('div');
+      handle.className = 'thumb-drag-handle';
+      handle.innerHTML = '&#8801;';
+      handle.title = 'Drag to reorder';
+      item.appendChild(handle);
+
+      const preview = document.createElement('div');
+      preview.className = 'thumb-preview';
+
+      const inner = document.createElement('div');
+      inner.className = 'thumb-inner';
+      inner.innerHTML = slide.innerHTML;
+      inner.querySelectorAll('[id]').forEach(el => el.removeAttribute('id'));
+      inner.querySelectorAll('.active,.exit').forEach(el => el.classList.remove('active','exit'));
+      inner.style.pointerEvents = 'none';
+      preview.appendChild(inner);
+
+      requestAnimationFrame(() => {
+        const w = preview.getBoundingClientRect().width;
+        if (w > 0) inner.style.transform = `scale(${w / 1280})`;
+      });
+
+      const label = document.createElement('div');
+      label.className = 'thumb-label';
+      label.textContent = 'Slide ' + n;
+
+      item.appendChild(preview);
+      item.appendChild(label);
+
+      // Click to navigate
+      preview.addEventListener('click', () => { closeOverview(); goTo(n); });
+      label.addEventListener('click',   () => { closeOverview(); goTo(n); });
+
+      // Drag to reorder
+      item.addEventListener('dragstart', e => {
+        dragSrcIdx = i;
+        e.dataTransfer.effectAllowed = 'move';
+        setTimeout(() => item.classList.add('dragging'), 0);
+      });
+      item.addEventListener('dragend', () => {
+        item.classList.remove('dragging');
+        overviewGrid.querySelectorAll('.thumb-item').forEach(t => t.classList.remove('drag-over'));
+      });
+      item.addEventListener('dragover', e => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        overviewGrid.querySelectorAll('.thumb-item').forEach(t => t.classList.remove('drag-over'));
+        item.classList.add('drag-over');
+      });
+      item.addEventListener('drop', e => {
+        e.preventDefault();
+        if (dragSrcIdx === null || dragSrcIdx === i) return;
+        const container = document.getElementById('slides');
+        const allSlides = Array.from(container.querySelectorAll('.slide'));
+        const srcSlide  = allSlides[dragSrcIdx];
+        container.removeChild(srcSlide);
+        const remaining = Array.from(container.querySelectorAll('.slide'));
+        if (dragSrcIdx < i) {
+          const ref = remaining[i - 1];
+          ref.nextSibling ? container.insertBefore(srcSlide, ref.nextSibling) : container.appendChild(srcSlide);
+        } else {
+          container.insertBefore(srcSlide, remaining[i]);
+        }
+        // Keep current pointing to the same slide content
+        const oldCurrent = current - 1;
+        if      (oldCurrent === dragSrcIdx)                              current = i + 1;
+        else if (dragSrcIdx < oldCurrent && i >= oldCurrent)             current--;
+        else if (dragSrcIdx > oldCurrent && i <= oldCurrent)             current++;
+        slides = document.querySelectorAll('.slide');
+        rebuildDots();
+        updateUI();
+        buildOverview();
+        dragSrcIdx = null;
+      });
+
+      overviewGrid.appendChild(item);
+    });
+  }
+
+  function openOverview() {
+    window.overviewOpen = true;
+    buildOverview();
+    overviewPanel.classList.add('open');
+  }
+  function closeOverview() {
+    window.overviewOpen = false;
+    overviewPanel.classList.remove('open');
+  }
+
+  document.getElementById('btn-overview').addEventListener('click', openOverview);
+  document.getElementById('btn-close-overview').addEventListener('click', closeOverview);
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && window.overviewOpen) closeOverview();
+  });
+
+  // ── Logo management ──
+  const logoOverlay     = document.getElementById('logo-overlay');
+  const logoSlideOrg    = document.getElementById('logo-slide-org');
+  const logoSlideClient = document.getElementById('logo-slide-client');
+
+  function updateLogoPosition() {
+    const overlay = document.getElementById('logo-overlay');
+    const orgImg  = document.getElementById('logo-slide-org');
+    const cliImg  = document.getElementById('logo-slide-client');
+    if (!overlay || !orgImg || !cliImg) return;
+    const hasAny  = orgImg.style.display === 'block' || cliImg.style.display === 'block';
+    overlay.style.display = hasAny ? 'flex' : 'none';
+    if (current === 1) {
+      overlay.classList.replace('logo-corner', 'logo-hero');
+    } else {
+      overlay.classList.replace('logo-hero', 'logo-corner');
+    }
+  }
+
+  function setupLogo(inputId, slideImgEl, miniImgId, hintId, clearId) {
+    document.getElementById(inputId).addEventListener('change', function () {
+      const file = this.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = e => {
+        const url = e.target.result;
+        slideImgEl.src = url;
+        slideImgEl.style.display = 'block';
+        document.getElementById(miniImgId).src = url;
+        document.getElementById(miniImgId).style.display = 'block';
+        document.getElementById(hintId).style.display = 'none';
+        document.getElementById(clearId).style.display = 'block';
+        updateLogoPosition();
+      };
+      reader.readAsDataURL(file);
+    });
+    document.getElementById(clearId).addEventListener('click', () => {
+      slideImgEl.src = '';
+      slideImgEl.style.display = 'none';
+      document.getElementById(miniImgId).style.display = 'none';
+      document.getElementById(hintId).style.display = 'block';
+      document.getElementById(clearId).style.display = 'none';
+      updateLogoPosition();
+    });
+  }
+
+  setupLogo('logo-org-input',    logoSlideOrg,    'logo-org-mini',    'logo-org-hint',    'logo-org-clear');
+  setupLogo('logo-client-input', logoSlideClient, 'logo-client-mini', 'logo-client-hint', 'logo-client-clear');
+
+  const logoPanel = document.getElementById('logo-panel');
+  document.getElementById('btn-logo').addEventListener('click', () => logoPanel.classList.toggle('open'));
+  document.getElementById('btn-logo-close').addEventListener('click', () => logoPanel.classList.remove('open'));
 
   // ── Slide 13: Camera animation logic ──
   const camScene   = document.getElementById('cam-scene');
