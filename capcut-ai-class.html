@@ -588,6 +588,106 @@
   }
   .app-link:hover { text-decoration: underline; }
 
+  /* ── Prompt → Image → Video Workflow Slide ── */
+  .wf-row {
+    display: grid;
+    grid-template-columns: 1fr 72px 1fr 72px 1fr;
+    align-items: center;
+    width: 100%;
+    margin-top: 12px;
+    gap: 0;
+  }
+  .wf-card {
+    border: 2px solid var(--border);
+    border-radius: 16px;
+    padding: 14px 14px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    background: var(--surface2);
+    position: relative;
+    overflow: hidden;
+  }
+  .wf-step { font-size: 0.62rem; font-weight: 800; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); }
+  .wf-title { font-size: clamp(0.85rem,1.3vw,1rem); font-weight: 700; color: var(--text); }
+
+  /* Terminal */
+  .wf-terminal {
+    background: #06060d; border: 1px solid #1a1a2a; border-radius: 8px;
+    padding: 8px 10px; font-family: 'Consolas', monospace;
+    font-size: 0.68rem; color: #a78bfa; line-height: 1.65; min-height: 82px;
+  }
+  .wf-terminal-label { color: #06b6d4; font-size: 0.62rem; margin-bottom: 3px; display: block; }
+  .wf-cursor { display: inline-block; color: #06b6d4; animation: wf-blink 0.8s step-end infinite; }
+  .wf-prompt-text { animation: wf-text-in 9s ease-in-out infinite; }
+
+  /* Scene (shared by image + video) */
+  .wf-scene-wrap {
+    width: 100%; aspect-ratio: 16/9; border-radius: 8px;
+    overflow: hidden; position: relative; background: #07070f;
+  }
+  .wf-scene-bg   { position: absolute; inset: 0; background: linear-gradient(180deg,#0c0c1a 0%,#111122 55%,#0e0e1c 100%); }
+  .wf-scene-win  { position: absolute; top:8%; left:5%; width:26%; height:55%; background:linear-gradient(180deg,#0d1b2a,#1a2f4a); border:2px solid #1e3a5c; border-radius:3px; }
+  .wf-scene-win::after { content:''; position:absolute; top:50%; left:0; right:0; height:2px; background:#1e3a5c; }
+  .wf-scene-win::before { content:''; position:absolute; top:0; bottom:0; left:50%; width:2px; background:#1e3a5c; }
+  .wf-city-light { position:absolute; bottom:12%; width:7px; border-radius:2px; background:#f59e0b; opacity:0.7; }
+  .wf-scene-desk { position:absolute; bottom:8%; left:28%; width:62%; height:7%; background:#1c1c2e; border-radius:2px; }
+  .wf-scene-mon  { position:absolute; bottom:15%; left:42%; width:22%; height:26%; background:#0a0a14; border:1px solid #252538; border-radius:3px; }
+  .wf-scene-mon::after { content:''; position:absolute; inset:3px; background: linear-gradient(135deg,#0d1a2e,#0a1628); border-radius:2px; }
+  .wf-scene-glow { position:absolute; inset:0; background:radial-gradient(ellipse at 60% 40%,rgba(124,58,237,0.18) 0%,transparent 65%); pointer-events:none; }
+  .wf-scene-person { position:absolute; bottom:15%; left:52%; width:16%; }
+  .wf-person-head { width:40%; aspect-ratio:1; background:#181828; border-radius:50%; margin:0 auto 0; }
+  .wf-person-body { width:70%; height:55%; background:#141422; border-radius:40% 40% 0 0; margin:0 auto; }
+
+  /* Shimmer on image card */
+  .wf-shimmer { position:absolute; inset:0; background:linear-gradient(105deg,transparent 35%,rgba(255,255,255,0.07) 50%,transparent 65%); animation:wf-shimmer 3s ease-in-out infinite; }
+  @keyframes wf-shimmer { 0%{transform:translateX(-100%)} 100%{transform:translateX(200%)} }
+
+  /* Video extras */
+  .wf-scanlines { position:absolute; inset:0; background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.12) 2px,rgba(0,0,0,0.12) 4px); pointer-events:none; z-index:2; }
+  .wf-play-wrap { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; z-index:3; }
+  .wf-play-icon { width:34px; height:34px; background:rgba(255,255,255,0.92); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:13px; color:#000; padding-left:3px; position:relative; z-index:2; }
+  .wf-ring { position:absolute; width:52px; height:52px; border:2px solid rgba(255,255,255,0.35); border-radius:50%; animation:wf-ring-pulse 2s ease-out infinite; }
+  .wf-ring-2 { animation-delay:1s; }
+  @keyframes wf-ring-pulse { 0%{transform:scale(1);opacity:.6} 100%{transform:scale(2.1);opacity:0} }
+  .wf-walk { animation: wf-walking 2.5s ease-in-out infinite alternate; }
+  @keyframes wf-walking { from{left:48%} to{left:57%} }
+
+  /* Arrows */
+  .wf-arrow { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:5px; padding:0 6px; }
+  .wf-arrow-track { width:100%; height:3px; background:var(--border); border-radius:3px; position:relative; overflow:hidden; }
+  .wf-arrow-tip { color:var(--muted); font-size:1.2rem; line-height:1; margin-top:-4px; }
+  .wf-arrow-lbl { font-size:0.58rem; color:var(--muted); text-align:center; letter-spacing:0.04em; }
+  .wf-particle { position:absolute; top:-2px; height:7px; width:35%; background:linear-gradient(90deg,transparent,var(--accent2),transparent); border-radius:4px; }
+
+  /* Tools row */
+  .wf-tools { display:flex; align-items:center; gap:8px; margin-top:13px; flex-wrap:wrap; justify-content:center; }
+
+  /* Sequential glow animations — 9s cycle */
+  @keyframes wf-card-glow {
+    0%,4%    { border-color:var(--border); background:var(--surface2); box-shadow:none; }
+    10%,28%  { border-color:var(--accent2); background:rgba(6,182,212,0.1); box-shadow:0 0 22px rgba(6,182,212,0.22); }
+    37%,100% { border-color:var(--border); background:var(--surface2); box-shadow:none; }
+  }
+  @keyframes wf-particle-flow {
+    0%,12%   { transform:translateX(-150%); opacity:0; }
+    18%      { opacity:1; }
+    35%,100% { transform:translateX(250%); opacity:0; }
+  }
+  @keyframes wf-text-in {
+    0%,4%    { opacity:0.25; }
+    10%,30%  { opacity:1; }
+    37%,100% { opacity:0.25; }
+  }
+  @keyframes wf-blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+  .wf-card-prompt { animation: wf-card-glow 9s ease-in-out infinite 0s; }
+  .wf-card-image  { animation: wf-card-glow 9s ease-in-out infinite 3s; }
+  .wf-card-video  { animation: wf-card-glow 9s ease-in-out infinite 6s; }
+  .wf-arrow-1 .wf-particle { animation: wf-particle-flow 9s ease-in-out infinite 2.2s; }
+  .wf-arrow-2 .wf-particle { animation: wf-particle-flow 9s ease-in-out infinite 5.2s; }
+  .wf-prompt-text { animation: wf-text-in 9s ease-in-out infinite 0s; }
+
   /* ── Drag to Reorder ── */
   .thumb-item { position: relative; }
   .thumb-drag-handle {
@@ -1738,7 +1838,7 @@ Top down: Top down view of workspace with laptop, coffee and notebook, clean min
 </div>
 
 <script>
-  let totalSlides = 37;
+  let totalSlides = 38;
   let current = 1;
   let isAnimating = false;
 
