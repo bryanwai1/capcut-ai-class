@@ -452,6 +452,7 @@
 
   #editor-overlay {
     position: fixed; inset: 0;
+    pointer-events: none;
     background: rgba(0,0,0,0.6);
     backdrop-filter: blur(6px);
     z-index: 400;
@@ -459,7 +460,7 @@
     align-items: center;
     justify-content: center;
   }
-  #editor-overlay.open { display: flex; }
+  #editor-overlay.open { display: flex; pointer-events: all; }
 
   #editor-modal {
     background: #16161f;
@@ -547,6 +548,134 @@
     border-radius: 9px; cursor: pointer; font-size: 0.88rem; transition: all 0.2s;
   }
   .btn-create:hover { opacity: 0.85; }
+
+  /* ── QR Modal ── */
+  #btn-qr {
+    position:fixed; bottom:18px; left:156px;
+    background:rgba(255,255,255,0.06); border:1px solid var(--border);
+    color:var(--muted); width:38px; height:38px; border-radius:9px;
+    cursor:pointer; font-size:1rem;
+    display:flex; align-items:center; justify-content:center;
+    transition:all 0.2s; z-index:100;
+  }
+  #btn-qr:hover { background:rgba(124,58,237,0.3); color:#fff; border-color:var(--accent); }
+  #qr-overlay {
+    position:fixed; inset:0;
+    background:rgba(0,0,0,0.85); backdrop-filter:blur(10px);
+    z-index:500; display:none; align-items:center; justify-content:center; flex-direction:column; gap:20px;
+  }
+  #qr-overlay.open { display:flex; }
+  #qr-box {
+    background:#fff; border-radius:20px; padding:24px;
+    display:flex; flex-direction:column; align-items:center; gap:14px;
+    box-shadow:0 30px 80px rgba(0,0,0,0.6);
+  }
+  #qr-box img { width:260px; height:260px; display:block; border-radius:6px; }
+  #qr-url {
+    font-size:0.82rem; color:#374151; text-align:center; font-family:'Consolas',monospace;
+    word-break:break-all; max-width:260px; line-height:1.5;
+  }
+  #qr-label {
+    font-size:0.72rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase;
+    color:#6b7280; text-align:center;
+  }
+  #btn-qr-close {
+    position:fixed; top:20px; right:20px;
+    background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2);
+    color:#fff; width:40px; height:40px; border-radius:50%;
+    cursor:pointer; font-size:1.1rem; display:flex; align-items:center; justify-content:center;
+    transition:all 0.2s;
+  }
+  #btn-qr-close:hover { background:rgba(255,255,255,0.2); }
+
+  /* ── Presenter Notes ── */
+  #btn-notes {
+    position:fixed; bottom:18px; left:202px;
+    background:rgba(255,255,255,0.06); border:1px solid var(--border);
+    color:var(--muted); width:38px; height:38px; border-radius:9px;
+    cursor:pointer; font-size:1rem;
+    display:flex; align-items:center; justify-content:center;
+    transition:all 0.2s; z-index:100;
+  }
+  #btn-notes:hover { background:rgba(245,158,11,0.25); color:var(--accent3); border-color:var(--accent3); }
+  #btn-notes.connected { border-color:#22c55e; color:#22c55e; }
+
+  /* Setup modal */
+  #notes-setup {
+    position:fixed; inset:0;
+    background:rgba(0,0,0,0.75); backdrop-filter:blur(8px);
+    z-index:600; display:none; align-items:center; justify-content:center;
+    pointer-events: none;
+  }
+  #notes-setup.open { display:flex; pointer-events: all; }
+  #notes-setup-box {
+    background:#16161f; border:1px solid var(--border); border-radius:18px;
+    padding:28px 30px; width:min(480px,92vw); display:flex; flex-direction:column; gap:16px;
+    box-shadow:0 24px 60px rgba(0,0,0,0.6);
+  }
+  #notes-setup-box h4 { font-size:1rem; font-weight:700; color:var(--text); }
+  #notes-setup-box p  { font-size:0.82rem; color:var(--muted); line-height:1.7; }
+  #notes-setup-box code {
+    background:#0d0d14; border:1px solid var(--border); border-radius:6px;
+    padding:2px 7px; font-family:Consolas,monospace; font-size:0.8rem; color:#a78bfa;
+  }
+  #fb-url-input {
+    width:100%; background:#0d0d14; border:1px solid var(--border); border-radius:9px;
+    color:var(--text); font-size:0.88rem; padding:10px 14px; outline:none; font-family:inherit;
+  }
+  #fb-url-input:focus { border-color:var(--accent2); }
+  .notes-setup-actions { display:flex; gap:10px; justify-content:flex-end; }
+
+  /* Notes panel (presenter) */
+  #notes-panel {
+    position:fixed; bottom:70px; right:18px;
+    width:min(340px,90vw); background:#16161f;
+    border:1px solid var(--border); border-radius:16px;
+    padding:16px 18px; display:none; flex-direction:column; gap:12px;
+    box-shadow:0 12px 40px rgba(0,0,0,0.55); z-index:200;
+  }
+  #notes-panel.open { display:flex; }
+  #notes-panel-header { display:flex; align-items:center; justify-content:space-between; }
+  #notes-panel-title { font-size:0.78rem; font-weight:700; color:var(--text); display:flex; align-items:center; gap:8px; }
+  #notes-status { width:8px; height:8px; border-radius:50%; background:#6b7280; flex-shrink:0; }
+  #notes-status.live { background:#22c55e; animation:rec-blink 2s infinite; }
+  #notes-textarea {
+    width:100%; background:#0d0d14; border:1px solid var(--border); border-radius:9px;
+    color:var(--text); font-size:0.88rem; padding:10px 12px; outline:none;
+    font-family:inherit; resize:none; line-height:1.6;
+  }
+  #notes-textarea:focus { border-color:var(--accent3); }
+  #notes-char-count { font-size:0.68rem; color:var(--muted); text-align:right; margin-top:-6px; }
+  #btn-broadcast {
+    background:var(--accent3); border:none; color:#000; font-weight:700;
+    padding:10px; border-radius:9px; cursor:pointer; font-size:0.88rem;
+    transition:all 0.2s; width:100%;
+  }
+  #btn-broadcast:hover { opacity:0.85; }
+  #btn-broadcast:disabled { opacity:0.4; cursor:not-allowed; }
+  #btn-clear-note {
+    background:none; border:1px solid var(--border); color:var(--muted);
+    padding:6px; border-radius:8px; cursor:pointer; font-size:0.75rem; transition:all 0.2s;
+  }
+  #btn-clear-note:hover { border-color:#ef4444; color:#ef4444; }
+
+  /* Audience note banner */
+  #note-banner {
+    position:fixed; bottom:0; left:0; right:0; z-index:300;
+    background:linear-gradient(135deg,#1a1a10,#14140a);
+    border-top:2px solid var(--accent3);
+    padding:14px 24px; display:none;
+    align-items:center; gap:16px;
+    transform:translateY(100%); transition:transform 0.4s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  #note-banner.visible { display:flex; transform:translateY(0); }
+  #note-banner-icon { font-size:1.3rem; flex-shrink:0; }
+  #note-banner-text { font-size:clamp(0.9rem,2vw,1.1rem); color:var(--text); flex:1; line-height:1.5; font-weight:500; }
+  #btn-dismiss-note {
+    background:none; border:1px solid rgba(245,158,11,0.3); color:var(--muted);
+    padding:5px 12px; border-radius:7px; cursor:pointer; font-size:0.75rem; flex-shrink:0;
+  }
+  #btn-dismiss-note:hover { border-color:var(--accent3); color:var(--accent3); }
 
   /* ── Apps Slide ── */
   .apps-grid {
@@ -1156,6 +1285,131 @@ Include:
 </div>
 
 <!-- SLIDE 11 -->
+<!-- SLIDE: Prompt → Image → Video Workflow -->
+<div class="slide" id="s-workflow" style="align-items:flex-start;justify-content:center;padding:40px 70px;">
+
+  <div style="display:flex;align-items:center;justify-content:space-between;width:100%;margin-bottom:14px;">
+    <div>
+      <div class="tagline" style="margin-bottom:8px;">The Core Workflow</div>
+      <div style="font-size:clamp(1.1rem,2vw,1.6rem);font-weight:700;color:var(--text);">Prompt → Image → Video</div>
+      <p style="margin-top:5px;font-size:clamp(0.78rem,1.2vw,0.9rem);">Write once. Generate. Animate. Every time.</p>
+    </div>
+    <div style="font-size:0.7rem;color:rgba(148,163,184,0.4);text-align:right;letter-spacing:0.08em;">AUTO-PLAYING DEMO</div>
+  </div>
+
+  <div class="wf-row">
+
+    <!-- STEP 1: PROMPT -->
+    <div class="wf-card wf-card-prompt">
+      <div class="wf-step">Step 01</div>
+      <div class="wf-title">Write a Prompt</div>
+      <div class="wf-terminal">
+        <span class="wf-terminal-label">// ChatGPT / manual</span>
+        <span class="wf-prompt-text">Malaysian professional woman presenting in boardroom, cinematic lighting, shallow depth of field, realistic</span><span class="wf-cursor">▌</span>
+      </div>
+      <div class="wf-tools">
+        <span class="badge cyan" style="font-size:0.65rem;padding:3px 9px;">ChatGPT</span>
+        <span class="badge purple" style="font-size:0.65rem;padding:3px 9px;">Manual</span>
+      </div>
+    </div>
+
+    <!-- ARROW 1 -->
+    <div class="wf-arrow wf-arrow-1">
+      <div class="wf-arrow-track"><div class="wf-particle"></div></div>
+      <div class="wf-arrow-tip">›</div>
+      <div class="wf-arrow-lbl">Generate</div>
+    </div>
+
+    <!-- STEP 2: IMAGE -->
+    <div class="wf-card wf-card-image">
+      <div class="wf-step">Step 02</div>
+      <div class="wf-title">Generate Image</div>
+      <div class="wf-scene-wrap">
+        <div class="wf-scene-bg"></div>
+        <div class="wf-scene-win"></div>
+        <div class="wf-city-light" style="left:9%;height:20%;bottom:12%;"></div>
+        <div class="wf-city-light" style="left:16%;height:26%;bottom:12%;background:#06b6d4;opacity:0.5;"></div>
+        <div class="wf-city-light" style="left:22%;height:17%;bottom:12%;"></div>
+        <div class="wf-city-light" style="left:28%;height:23%;bottom:12%;background:#f59e0b;opacity:0.6;"></div>
+        <div class="wf-scene-desk"></div>
+        <div class="wf-scene-mon"></div>
+        <div class="wf-scene-person">
+          <div class="wf-person-head"></div>
+          <div class="wf-person-body"></div>
+        </div>
+        <div class="wf-scene-glow"></div>
+        <div class="wf-shimmer"></div>
+        <!-- Corner frame marks -->
+        <div style="position:absolute;top:5px;left:5px;width:12px;height:12px;border-top:2px solid rgba(255,255,255,0.4);border-left:2px solid rgba(255,255,255,0.4);"></div>
+        <div style="position:absolute;top:5px;right:5px;width:12px;height:12px;border-top:2px solid rgba(255,255,255,0.4);border-right:2px solid rgba(255,255,255,0.4);"></div>
+        <div style="position:absolute;bottom:5px;left:5px;width:12px;height:12px;border-bottom:2px solid rgba(255,255,255,0.4);border-left:2px solid rgba(255,255,255,0.4);"></div>
+        <div style="position:absolute;bottom:5px;right:5px;width:12px;height:12px;border-bottom:2px solid rgba(255,255,255,0.4);border-right:2px solid rgba(255,255,255,0.4);"></div>
+      </div>
+      <div class="wf-tools">
+        <span class="badge amber" style="font-size:0.65rem;padding:3px 9px;">Nano Banana</span>
+        <span class="badge amber" style="font-size:0.65rem;padding:3px 9px;">Arena AI</span>
+      </div>
+    </div>
+
+    <!-- ARROW 2 -->
+    <div class="wf-arrow wf-arrow-2">
+      <div class="wf-arrow-track"><div class="wf-particle"></div></div>
+      <div class="wf-arrow-tip">›</div>
+      <div class="wf-arrow-lbl">Animate</div>
+    </div>
+
+    <!-- STEP 3: VIDEO -->
+    <div class="wf-card wf-card-video">
+      <div class="wf-step">Step 03</div>
+      <div class="wf-title">Animate to Video</div>
+      <div class="wf-scene-wrap">
+        <div class="wf-scene-bg"></div>
+        <div class="wf-scene-win"></div>
+        <div class="wf-city-light" style="left:9%;height:20%;bottom:12%;"></div>
+        <div class="wf-city-light" style="left:16%;height:26%;bottom:12%;background:#06b6d4;opacity:0.5;"></div>
+        <div class="wf-city-light" style="left:22%;height:17%;bottom:12%;"></div>
+        <div class="wf-city-light" style="left:28%;height:23%;bottom:12%;background:#f59e0b;opacity:0.6;"></div>
+        <div class="wf-scene-desk"></div>
+        <div class="wf-scene-mon"></div>
+        <!-- Walking person -->
+        <div class="wf-scene-person wf-walk">
+          <div class="wf-person-head"></div>
+          <div class="wf-person-body"></div>
+        </div>
+        <div class="wf-scene-glow"></div>
+        <div class="wf-scanlines"></div>
+        <!-- Play button -->
+        <div class="wf-play-wrap">
+          <div class="wf-ring"></div>
+          <div class="wf-ring wf-ring-2"></div>
+          <div class="wf-play-icon">▶</div>
+        </div>
+        <!-- Corner frame marks -->
+        <div style="position:absolute;top:5px;left:5px;width:12px;height:12px;border-top:2px solid rgba(255,255,255,0.4);border-left:2px solid rgba(255,255,255,0.4);"></div>
+        <div style="position:absolute;top:5px;right:5px;width:12px;height:12px;border-top:2px solid rgba(255,255,255,0.4);border-right:2px solid rgba(255,255,255,0.4);"></div>
+        <div style="position:absolute;bottom:5px;left:5px;width:12px;height:12px;border-bottom:2px solid rgba(255,255,255,0.4);border-left:2px solid rgba(255,255,255,0.4);"></div>
+        <div style="position:absolute;bottom:5px;right:5px;width:12px;height:12px;border-bottom:2px solid rgba(255,255,255,0.4);border-right:2px solid rgba(255,255,255,0.4);"></div>
+        <!-- REC -->
+        <div style="position:absolute;top:7px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:4px;font-size:9px;font-family:monospace;color:rgba(255,255,255,0.7);letter-spacing:0.1em;">
+          <div style="width:6px;height:6px;background:#ef4444;border-radius:50%;animation:rec-blink 1s infinite;"></div>REC
+        </div>
+      </div>
+      <div class="wf-tools">
+        <span class="badge purple" style="font-size:0.65rem;padding:3px 9px;">WAN AI</span>
+        <span class="badge purple" style="font-size:0.65rem;padding:3px 9px;">LumaLabs</span>
+        <span class="badge purple" style="font-size:0.65rem;padding:3px 9px;">Kie AI</span>
+      </div>
+    </div>
+
+  </div>
+
+  <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:14px;font-size:0.78rem;color:var(--muted);">
+    <span style="color:var(--accent2);font-weight:700;">Tip:</span>
+    Upload your generated image into WAN AI, LumaLabs or Kie AI → set camera movement → export your video clip
+  </div>
+
+</div>
+
 <div class="slide slide-content" id="s11">
   <div class="tagline">Video Generation</div>
   <h3>Video Scene Generation</h3>
@@ -1825,6 +2079,68 @@ Top down: Top down view of workspace with laptop, coffee and notebook, clean min
   </div>
 </div>
 
+<!-- QR button -->
+<button id="btn-qr" title="Show QR code">⬡</button>
+
+<!-- Notes button -->
+<button id="btn-notes" title="Presenter notes">✎</button>
+
+<!-- QR Modal -->
+<div id="qr-overlay">
+  <button id="btn-qr-close">✕</button>
+  <div style="color:#fff;font-size:0.82rem;letter-spacing:0.12em;text-transform:uppercase;opacity:0.6;">Scan to join on your device</div>
+  <div id="qr-box">
+    <div id="qr-label">Class Slide Deck</div>
+    <img id="qr-img" src="" alt="QR Code">
+    <div id="qr-url"></div>
+  </div>
+  <div style="color:rgba(255,255,255,0.4);font-size:0.75rem;text-align:center;max-width:320px;line-height:1.7;">
+    Participants open this on their phone or laptop<br>to follow along with the slides
+  </div>
+</div>
+
+<!-- Notes Setup Modal -->
+<div id="notes-setup">
+  <div id="notes-setup-box">
+    <h4>📡 Live Presenter Notes</h4>
+    <p>Type a note and it appears instantly on every participant's screen. <strong style="color:var(--accent2);">No account needed.</strong></p>
+    <p style="font-size:0.8rem;color:var(--muted);">Choose a unique topic name for your class session. Participants who open the slide link will automatically receive your notes.</p>
+    <div class="editor-field">
+      <label>Your class topic name</label>
+      <input type="text" id="ntfy-topic-input" placeholder="e.g. bryan-capcut-class-2026" style="width:100%;background:#0d0d14;border:1px solid var(--border);border-radius:9px;color:var(--text);font-size:0.88rem;padding:10px 14px;outline:none;font-family:inherit;">
+    </div>
+    <div class="notes-setup-actions">
+      <button class="btn-cancel" id="btn-notes-setup-cancel">Cancel</button>
+      <button class="btn-create" id="btn-notes-setup-save">Start Broadcasting</button>
+    </div>
+    <p style="font-size:0.7rem;opacity:0.5;margin-top:4px;">Powered by ntfy.sh — free, open source, no login required.</p>
+  </div>
+</div>
+
+<!-- Presenter Notes Panel -->
+<div id="notes-panel">
+  <div id="notes-panel-header">
+    <div id="notes-panel-title">
+      <div id="notes-status"></div>
+      Presenter Notes
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <button id="btn-clear-note">Clear</button>
+      <button id="btn-notes-panel-close" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:1rem;">✕</button>
+    </div>
+  </div>
+  <textarea id="notes-textarea" rows="4" placeholder="Type a note… it will appear on all participant screens instantly."></textarea>
+  <div id="notes-char-count">0 / 280</div>
+  <button id="btn-broadcast">📡 Broadcast to All Devices</button>
+</div>
+
+<!-- Audience Note Banner -->
+<div id="note-banner">
+  <div id="note-banner-icon">📌</div>
+  <div id="note-banner-text"></div>
+  <button id="btn-dismiss-note">Dismiss</button>
+</div>
+
 <!-- Overview button -->
 <button id="btn-overview" title="Slide overview">⊞</button>
 
@@ -1838,6 +2154,12 @@ Top down: Top down view of workspace with laptop, coffee and notebook, clean min
 </div>
 
 <script>
+  // Helper: safe getElementById + addEventListener
+  function on(id, evt, fn) {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener(evt, fn);
+  }
+
   let totalSlides = 38;
   let current = 1;
   let isAnimating = false;
@@ -1913,8 +2235,8 @@ Top down: Top down view of workspace with laptop, coffee and notebook, clean min
   function next() { goTo(current + 1); }
   function prev() { goTo(current - 1); }
 
-  document.getElementById('btn-next').addEventListener('click', next);
-  document.getElementById('btn-prev').addEventListener('click', prev);
+  on('btn-next', 'click', next);
+  on('btn-prev', 'click', prev);
 
   document.addEventListener('keydown', (e) => {
     if (window.overviewOpen) return;
@@ -1950,10 +2272,10 @@ Top down: Top down view of workspace with laptop, coffee and notebook, clean min
   }
   function closeEditor() { editorOverlay.classList.remove('open'); }
 
-  document.getElementById('btn-add-slide').addEventListener('click', openEditor);
-  document.getElementById('btn-editor-close').addEventListener('click', closeEditor);
-  document.getElementById('btn-editor-cancel').addEventListener('click', closeEditor);
-  editorOverlay.addEventListener('click', e => { if (e.target === editorOverlay) closeEditor(); });
+  on('btn-add-slide', 'click', openEditor);
+  on('btn-editor-close', 'click', closeEditor);
+  on('btn-editor-cancel', 'click', closeEditor);
+  if (editorOverlay) editorOverlay.addEventListener('click', e => { if (e.target === editorOverlay) closeEditor(); });
 
   // Image preview
   document.getElementById('ed-img-input').addEventListener('change', function() {
@@ -1994,7 +2316,7 @@ Top down: Top down view of workspace with laptop, coffee and notebook, clean min
     return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   }
 
-  document.getElementById('btn-editor-create').addEventListener('click', () => {
+  on('btn-editor-create', 'click', () => {
     const title   = document.getElementById('ed-title').value.trim();
     const body    = document.getElementById('ed-body').value.trim();
     const pos     = document.getElementById('ed-position').value;
@@ -2139,8 +2461,8 @@ Top down: Top down view of workspace with laptop, coffee and notebook, clean min
     overviewPanel.classList.remove('open');
   }
 
-  document.getElementById('btn-overview').addEventListener('click', openOverview);
-  document.getElementById('btn-close-overview').addEventListener('click', closeOverview);
+  on('btn-overview', 'click', openOverview);
+  on('btn-close-overview', 'click', closeOverview);
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && window.overviewOpen) closeOverview();
   });
@@ -2195,14 +2517,171 @@ Top down: Top down view of workspace with laptop, coffee and notebook, clean min
   setupLogo('logo-client-input', logoSlideClient, 'logo-client-mini', 'logo-client-hint', 'logo-client-clear');
 
   const logoPanel = document.getElementById('logo-panel');
-  document.getElementById('btn-logo').addEventListener('click', () => logoPanel.classList.toggle('open'));
-  document.getElementById('btn-logo-close').addEventListener('click', () => logoPanel.classList.remove('open'));
+  on('btn-logo', 'click', () => logoPanel.classList.toggle('open'));
+  on('btn-logo-close', 'click', () => logoPanel.classList.remove('open'));
+
+  // ── QR Code ──
+  const qrOverlay = document.getElementById('qr-overlay');
+  const qrImg     = document.getElementById('qr-img');
+  const qrUrl     = document.getElementById('qr-url');
+
+  const SAVED_QR_URL = 'capcut_qr_url';
+  const GITHUB_URL   = 'https://bryanwai1.github.io/capcut-ai-class/capcut-ai-class.html';
+
+  function getPublicUrl() {
+    const saved = localStorage.getItem(SAVED_QR_URL);
+    if (saved) return saved;
+    const href = window.location.href;
+    if (href.startsWith('https://') || href.startsWith('http://localhost')) {
+      return href.split('?')[0].split('#')[0];
+    }
+    return GITHUB_URL; // fallback to known GitHub Pages URL
+  }
+
+  function renderQR(url) {
+    qrImg.src = 'https://api.qrserver.com/v1/create-qr-code/?size=260x260&color=1a1a2e&bgcolor=ffffff&qzone=2&data=' + encodeURIComponent(url);
+    qrUrl.textContent = url;
+  }
+
+  function openQR() {
+    renderQR(getPublicUrl());
+    // Lazily add Change URL button once
+    const box = document.getElementById('qr-box');
+    if (box && !box.querySelector('.qr-change-btn')) {
+      const changeLink = document.createElement('button');
+      changeLink.className = 'qr-change-btn';
+      changeLink.textContent = 'Change URL';
+      changeLink.style.cssText = 'background:none;border:none;color:#9ca3af;font-size:0.7rem;cursor:pointer;text-decoration:underline;';
+      changeLink.addEventListener('click', e => {
+        e.stopPropagation();
+        const input = prompt('Enter the public URL for the QR code:', getPublicUrl());
+        if (input && input.trim().startsWith('http')) {
+          localStorage.setItem(SAVED_QR_URL, input.trim());
+          renderQR(input.trim());
+        }
+      });
+      box.appendChild(changeLink);
+    }
+    if (qrOverlay) qrOverlay.classList.add('open');
+  }
+
+  on('btn-qr', 'click', openQR);
+  on('btn-qr-close', 'click', () => qrOverlay.classList.remove('open'));
+  if (qrOverlay) qrOverlay.addEventListener('click', e => { if (e.target === qrOverlay) qrOverlay.classList.remove('open'); });
+
+  // ── Presenter Notes (ntfy.sh — no account needed) ──
+  const NTFY_BASE     = 'https://ntfy.sh';
+  let ntfyTopic       = localStorage.getItem('ntfy_topic') || '';
+  let ntfyConnected   = false;
+  let ntfyEventSource = null;
+
+  const notesPanel     = document.getElementById('notes-panel');
+  const notesSetup     = document.getElementById('notes-setup');
+  const notesStatus    = document.getElementById('notes-status');
+  const notesBtnMain   = document.getElementById('btn-notes');
+  const notesTextarea  = document.getElementById('notes-textarea');
+  const charCount      = document.getElementById('notes-char-count');
+  const noteBanner     = document.getElementById('note-banner');
+  const noteBannerText = document.getElementById('note-banner-text');
+
+  function setConnected(yes) {
+    if (notesStatus) notesStatus.classList.toggle('live', yes);
+    if (notesBtnMain) notesBtnMain.classList.toggle('connected', yes);
+    ntfyConnected = yes;
+  }
+
+  function showBanner(text) {
+    if (!noteBannerText || !noteBanner) return;
+    noteBannerText.textContent = text;
+    noteBanner.classList.add('visible');
+  }
+  function hideBanner() {
+    if (noteBanner) noteBanner.classList.remove('visible');
+  }
+
+  // Subscribe to live updates via SSE
+  function startNtfyListener(topic) {
+    if (ntfyEventSource) ntfyEventSource.close();
+    ntfyEventSource = new EventSource(NTFY_BASE + '/' + topic + '/sse');
+    ntfyEventSource.addEventListener('message', e => {
+      try {
+        const data = JSON.parse(e.data);
+        const msg  = data.message || '';
+        if (msg === '__clear__') { hideBanner(); }
+        else if (msg) { showBanner(msg); }
+      } catch(_) {}
+    });
+    ntfyEventSource.onerror = () => setConnected(false);
+    ntfyEventSource.onopen  = () => setConnected(true);
+  }
+
+  // Publish a message
+  async function ntfyPublish(text) {
+    if (!ntfyTopic) return;
+    await fetch(NTFY_BASE + '/' + ntfyTopic, {
+      method: 'POST',
+      body: text || '__clear__'
+    });
+  }
+
+  on('btn-dismiss-note', 'click', hideBanner);
+
+  // Broadcast
+  on('btn-broadcast', 'click', async () => {
+    const text = notesTextarea ? notesTextarea.value.trim() : '';
+    await ntfyPublish(text);
+    if (text) showBanner(text); else hideBanner();
+  });
+
+  // Clear
+  on('btn-clear-note', 'click', async () => {
+    if (notesTextarea) notesTextarea.value = '';
+    if (charCount) charCount.textContent = '0 / 280';
+    await ntfyPublish('');
+    hideBanner();
+  });
+
+  if (notesTextarea) notesTextarea.addEventListener('input', () => {
+    const len = notesTextarea.value.length;
+    if (charCount) charCount.textContent = len + ' / 280';
+    if (len > 280) notesTextarea.value = notesTextarea.value.slice(0, 280);
+  });
+
+  // Open notes button
+  if (notesBtnMain) notesBtnMain.addEventListener('click', () => {
+    if (ntfyTopic) {
+      if (notesPanel) notesPanel.classList.toggle('open');
+    } else {
+      if (notesSetup) notesSetup.classList.add('open');
+    }
+  });
+  on('btn-notes-panel-close', 'click', () => notesPanel && notesPanel.classList.remove('open'));
+
+  // Setup modal
+  on('btn-notes-setup-cancel', 'click', () => notesSetup && notesSetup.classList.remove('open'));
+  on('btn-notes-setup-save', 'click', () => {
+    const topicInput = document.getElementById('ntfy-topic-input');
+    const topic = topicInput ? topicInput.value.trim().replace(/\s+/g,'-').toLowerCase() : '';
+    if (!topic) { alert('Please enter a topic name for your class.'); return; }
+    ntfyTopic = topic;
+    localStorage.setItem('ntfy_topic', ntfyTopic);
+    if (notesSetup) notesSetup.classList.remove('open');
+    if (notesPanel) notesPanel.classList.add('open');
+    startNtfyListener(ntfyTopic);
+    setConnected(true);
+  });
+
+  // Auto-restore on reload
+  if (ntfyTopic) {
+    startNtfyListener(ntfyTopic);
+  }
 
   // ── Slide 13: Camera animation logic ──
   const camScene   = document.getElementById('cam-scene');
   const recBadge   = document.getElementById('rec-badge');
   const shotLabel  = document.getElementById('shot-label');
   let camTimer     = null;
+  if (!camScene) console.warn('cam-scene not found — skipping camera logic');
 
   const easingMap = {
     static:  'ease-in-out',
@@ -2214,35 +2693,29 @@ Top down: Top down view of workspace with laptop, coffee and notebook, clean min
     drone:   'cubic-bezier(0.2,0,0.3,1)',
   };
 
-  document.querySelectorAll('.cam-card').forEach(card => {
+  if (camScene) document.querySelectorAll('.cam-card').forEach(card => {
     card.addEventListener('click', () => {
-      const anim = card.dataset.anim;
-      const dur  = parseInt(card.dataset.dur, 10);
+      const anim  = card.dataset.anim;
+      const dur   = parseInt(card.dataset.dur, 10);
       const label = card.dataset.label;
 
-      // Highlight active card
       document.querySelectorAll('.cam-card').forEach(c => c.classList.remove('active'));
       card.classList.add('active');
 
-      // Clear any running animation
       clearTimeout(camTimer);
       camScene.style.animation = 'none';
       camScene.style.transition = 'none';
-      void camScene.offsetWidth; // reflow
+      void camScene.offsetWidth;
 
-      // Show REC + label
-      recBadge.style.opacity = '1';
-      shotLabel.textContent  = label;
+      if (recBadge) recBadge.style.opacity = '1';
+      if (shotLabel) shotLabel.textContent = label;
 
-      // Apply animation
       const easing = easingMap[anim] || 'ease-in-out';
       camScene.style.animation = `cam-${anim} ${dur}ms ${easing} forwards`;
 
-      // Hide REC after animation ends
       camTimer = setTimeout(() => {
-        recBadge.style.opacity = '0';
-        // Smoothly reset scene to neutral
-        camScene.style.animation = 'none';
+        if (recBadge) recBadge.style.opacity = '0';
+        camScene.style.animation  = 'none';
         camScene.style.transition = 'transform 0.8s ease';
         camScene.style.transform  = 'translate(0,0) scale(1) rotate(0deg)';
         setTimeout(() => { camScene.style.transition = 'none'; }, 850);
